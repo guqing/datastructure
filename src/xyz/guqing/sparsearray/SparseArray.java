@@ -88,6 +88,7 @@ public class SparseArray {
 		// 将稀疏二维数组写入到文件并读取
 		readWriteSparseArray(sparseArray);
 	}
+		
 	/**
 	 * 格式化打印二维数组
 	 * @param array
@@ -100,44 +101,5 @@ public class SparseArray {
 			System.out.println("\n");
 		}
 	}
-	/**
-	 * 将稀疏矩阵写入到文件并读取出来恢复为稀疏矩阵
-	 * @param sparseArray
-	 * @throws IOException
-	 */
-	private static void readWriteSparseArray(int[][] sparseArray) throws IOException {
-
-		// 将稀疏数组保存到文件中在读取出来恢复成稀疏数组
-		System.out.println("将稀疏数组写入到map.data");
-		BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter("src/map.data"));
-		for(int i=0; i < sparseArray.length; i++) {
-			for(int j=0; j<3; j++) {
-				bufferedWriter.write(sparseArray[i][j]+"\t");
-			}
-			bufferedWriter.write("\n");
-		}
-		bufferedWriter.close();
-		
-		
-		BufferedReader bufferedReader = new BufferedReader(new FileReader("src/map.data"));
-		String line = bufferedReader.readLine();
-		String[] stringArray = line.split("\t");
-		int coverRow = Integer.parseInt(stringArray[2]);
-		int[][] sparseArray2= new int[coverRow+1][3];
-		sparseArray2[0][0] = Integer.parseInt(stringArray[0]);
-		sparseArray2[0][1] = Integer.parseInt(stringArray[1]);
-		sparseArray2[0][2] = Integer.parseInt(stringArray[2]);
-		int readCount = 1;
-		String readLine = null;
-		while((readLine = bufferedReader.readLine())!= null) {
-			String[] temp = readLine.split("\t");
-			sparseArray2[readCount][0] = Integer.parseInt(temp[0]);
-			sparseArray2[readCount][1] = Integer.parseInt(temp[1]);
-			sparseArray2[readCount][2] = Integer.parseInt(temp[2]);
-			readCount++;
-		}
-		System.out.println("恢复后的稀疏数组");
-		toStringArray(sparseArray2);
-		bufferedReader.close();
-	}
+	
 }
