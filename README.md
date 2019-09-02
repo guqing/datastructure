@@ -9,7 +9,7 @@ Java数据结构与算法笔记以及示例代码 <a href="https://github.com/gu
 
 ### 订阅更新
 
-本项目托管在https://github.com/guqing/datastructure你可以在 `GitHub `中 star 该项目查看更新。
+本项目托管在 https://github.com/guqing/datastructure 你可以在 `GitHub `中 star 该项目查看更新。
 
 ## 许可证
 
@@ -25,7 +25,7 @@ Java数据结构与算法笔记以及示例代码 <a href="https://github.com/gu
 
 查看笔记戳这里☞[学习笔记](./docs/algorithms.md)
 
-[github page](https://guqing.github.io/datastructure/docs/algorithms.md.html)
+[github page](https://guqing.github.io/datastructure/docs/algorithms.html)
 
 ### 稀疏数组
 
