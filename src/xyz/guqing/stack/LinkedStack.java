@@ -1,9 +1,12 @@
 package xyz.guqing.stack;
+
+import java.util.Iterator;
+
 /**
  * 使用链表实现栈
  * @author guqing
  */
-public class LinkedStack<T> {
+public class LinkedStack<T> implements Iterable<T>{
 	private Node<T> top;
 	private int size;
 	
@@ -76,6 +79,31 @@ public class LinkedStack<T> {
 		}
 	}
 	
+	@Override
+	public Iterator<T> iterator() {
+		return new ListIterator();
+	}
+	
+	/**
+	 * 自定义内部类实现Iterator方法完成栈的迭代器
+	 * @author guqing
+	 */
+	private class ListIterator implements Iterator<T>{
+		private Node<T> pointer = top;
+		
+		@Override
+		public boolean hasNext() {
+			return pointer != null;
+		}
+
+		@Override
+		public T next() {
+			T data = pointer.data;
+			pointer = pointer.next;
+			return data;
+		}
+	}
+	
 	public static void main(String[] args) {
 		LinkedStack<Integer> stack = new LinkedStack<>();
 		stack.push(17);
@@ -87,5 +115,10 @@ public class LinkedStack<T> {
 		Integer value = stack.pop();
 		System.out.println("栈顶元素: "+value);
 		System.out.println("size: "+stack.size() + ", 栈结构: " + stack);
+		
+		Iterator<Integer> it = stack.iterator();
+		while(it.hasNext()) {
+			System.out.println(it.next());
+		}
 	}
 }
