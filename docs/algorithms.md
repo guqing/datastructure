@@ -1380,7 +1380,7 @@ public static void main(String[] args) {
 1. 前缀表达式也称为波兰表达式，前缀表达式的运算符
 2. 举例说明：``(3+4)X5-6`,对应的前缀表达式就是`- X + 3 4 5 6`
 
-前缀表达式的计算机求值
+**前缀表达式的计算机求值**
 
 从左至右扫描表达式，遇到数字时，将数字压入堆栈，遇到运算符时，弹出栈顶的两个数，用运算符对他们做相应的计算（栈顶元素和次项元素），并将结果入栈；重复上述过程知道表达式的最左端，最后运算得出的值即为表达式的结果
 
@@ -1391,8 +1391,126 @@ public static void main(String[] args) {
 3. 接下来是`X`运算符，因此弹出`7`和`5`，计算出`7X5=35`，将`35`压入栈
 4. 最后是运算符，计算出35-6的值，即29，由此得出最终结果
 
+**中缀表达式**
+
+1. 中缀表达式的求职就是最常见的运算表达式，如`(3+4)X5-6`
+2. 中缀表达式的求值是我们人最熟悉的，但是对计算机来说却不好操作，因此，再计算结果时，往往会将中缀表达式转换成其他表达式来操作（一般转后缀表达式）。
+
+**后缀表达式**
+
+1. 后缀表达式又称为逆波兰表达式，与前缀表达式相似，知识运算符位于操作数之后。
+2. `(3+4)X5-6`对应的后缀表达式就是 `3 4 + 5 X 6 - `
+
+**后缀表达式的计算机求值**
+
+从左至右扫描表达式，遇到数字时，将数字压入堆栈，遇到运算符时，弹出栈顶的两个数，用运算符对他们做相应的计算（次顶元素和栈顶元素），并将结果入栈，重复上述过程知道表达式最右端，最后运算得出的值即为表达式的结果。
+
+例如：`(3+4)X5-6`对应的前缀表达式是`3 4 + 5 X 6 -`,针对后缀表达式求值步骤如下：
+
+1. 从左至右扫描，将3和4压入堆栈
+2. 遇到+运算符，因此弹出`4`和`3`(4为栈顶元素，3为次顶元素)，计算出`3+4`的值，得7入栈
+3. 将5入栈
+4. 接下来是X运算符，因此弹出5和7，计算`7X5=35`入栈
+5. 将`6`入栈
+6. 最后是运算符，计算出`35-6`得值，即29，由此得出最终结果
+
 #### 逆波兰计算器
 
 完成后缀表达式的计算器
 
-1. 输入一个逆波兰表达式，前缀表达式的运算符位于操作数之前
+1. 输入一个逆波兰表达式，使用栈(stack)，计算其结果
+2. 支持小括号和多位数整数，因为这里我们主要讲的是数据结构，因此计算器进行简化，只支持对整数的计算。
+
+```java
+/**
+ * 使用栈完成逆波兰计算器
+ * @author guqing
+ * @date 2019/9/4
+ */
+public class ReversePolish {
+	public static void main(String[] args) {
+		/**
+		 * 先定义一个逆波兰表达式
+		 * (3+4)*5-6 => 3 4 + 5 * 6 - => 29
+		 * (30+4)*5-6 => 30 4 + 5 * 6 => 164
+		 * 使用空格隔开方便处理
+		 */
+		String suffixExpression1 = "3 4 + 5 * 6 -";
+		String suffixExpression2 = "30 4 + 5 * 6 -";
+		
+		// 1.先将suffixExpression装入一个ArrayList中
+		List<String> rpList = getList(suffixExpression2);
+		// 2.使用ArrayList传递给一个方法，遍历配合栈完成计算
+		int result = calculate(rpList);
+		System.out.println("计算结果：" + result);
+	}
+	
+	/**
+	 * 将逆波兰表达式，依次将数据和运算符放入ArrayList
+	 */
+	public static List<String> getList(String suffixExpression) {
+		// 将suffixExpression分割
+		String[] splitArray = suffixExpression.split(" ");
+		// 转成list，注意这种方式转成的list和真正的List的区别
+		return Arrays.asList(splitArray);
+	}
+	/**
+	 * 1.从左至右扫描，将3和4压入堆栈
+	 * 2.遇到+运算符，弹出4和3(4是栈顶元素，3是次栈顶元素)，计算出3+4的值得到7，再将7入栈
+	 * 3.将5入栈
+	 * 4.接下来是*运算符，因此弹出5和7，计算出7*5=35，将35入栈
+	 * 5.将6入栈
+	 * 6.最后是-运算符，计算出35-6的值即29，由此得出最终结果
+	 * @param list 存储着逆波兰表达式每个元素的字符串集合
+	 * @return 返回逆波兰计算器的计算结果
+	 */
+	public static int calculate(List<String> list) {
+		// 创建一个栈
+		Stack<String> stack = new Stack<String>();
+		// 遍历list
+		for(String item : list) {
+			// 正则匹配数字
+			if(item.matches("\\d+")) {
+				// 将数字入栈
+				stack.push(item);
+			} else {
+				// 由于当前是else说明item是一个符号
+				// pop出两个数，并计算，再入栈
+				int num2 = Integer.parseInt(stack.pop());
+				int num1 = Integer.parseInt(stack.pop());
+				
+				// 计算
+				int result = switchCalc(item, num1, num2);
+				// 入栈
+				stack.push(result + "");
+			}
+		}
+		return Integer.parseInt(stack.pop());
+	}
+	
+	public static int switchCalc(String item, int num1, int num2) {
+		int result = 0;
+		switch (item) {
+		case "+":
+			result = num1 + num2;
+			break;
+		case "-":
+			result = num1 - num2;
+			break;
+		case "*":
+			result = num1 * num2;
+			break;
+		case "/":
+			result = num1 / num2;
+			break;
+		case "%":
+			result = num1 % num2;
+			break;
+		default:
+			break;
+		}
+		return result;
+	}
+}
+```
+
