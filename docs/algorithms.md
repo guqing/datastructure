@@ -1375,7 +1375,7 @@ public static void main(String[] args) {
 }
 ```
 
-#### 前缀、中缀、后缀表达式
+### 前缀、中缀、后缀表达式
 
 1. 前缀表达式也称为波兰表达式，前缀表达式的运算符
 2. 举例说明：``(3+4)X5-6`,对应的前缀表达式就是`- X + 3 4 5 6`
@@ -1510,6 +1510,168 @@ public class ReversePolish {
 			break;
 		}
 		return result;
+	}
+}
+```
+
+#### 中缀表达式转后缀表达式
+
+通过上面的逆波兰计算器，我们会发现需要认为的将中缀表达式转为后缀表达式才能计算，很不方便，那么现在就来看一下如何将中缀表达式转为后缀表达式？
+
+1. 初始化两个栈:运算符栈`stack1`和存储中间结果的栈`stack2`
+2. 从左至右的草庙中缀表达式
+3. 遇到操作数时，将其压入`stack2`
+4. 遇到运算符时，比较其与`stack1`栈顶运算符的优先级
+   - 如果`stack1`为空，或栈顶运算符为左括号“(”,则直接将此运算符入栈
+   - 否则，若优先级比栈顶运算符高，也将运算符压入`stack1`
+   - 否则，将`stack1`栈顶的运算符弹出并压入到`stac2`中，在粗转到`(4-1)`与`stack1`中新的栈顶运算符相比较
+5. 遇到括号时
+
+   1. 如果是左括号“(”，则直接压入stack1
+   2. 如果是右括号“)”,则依次弹出stack1栈顶的运算符，并压入stack2，直到遇到左括号为止，此时将这一对括号丢弃
+6. 重复步骤2至5，直到表达式的最右边
+7. 将stack1中剩余的运算符依次弹出并压入stack2
+8. 依次弹出stack2中的元素并输出，结果的逆序即为中缀表达式对应的后缀表达式。
+
+```java
+public class ReversePolish {
+	/**
+	 * 中缀表达式转后缀表达式
+	 */
+	public static List<String> infixToSuffix(String expression) {
+		// 先将中缀表达式转成中缀的List
+		List<String> infixList = infixToList(expression);
+		
+		// 定义存储符号栈和中间结果的栈
+		Stack<String> stack1 = new Stack<>();
+		// stack2这个栈在整个转换过程中没有pop操作，而且最后还要逆序，所以使用list替换stack2
+		List<String> stack2 = new ArrayList<>();
+		
+		for(String item : infixList) {
+			// 如果是一个数就入stack2
+			if(item.matches("\\d+\\.?\\d*")) {
+				stack2.add(item);
+			} else if(item.equals("(")) {
+				// 是左括号如stack1
+				stack1.push(item);
+			} else if(item.equals(")")) {
+				// 是右括号，则依次弹出stack1栈顶的运算符并压入stack2，直到遇到左括号为止，此时将这一对括号丢弃
+				while(!stack1.peek().equals("(")) {
+					stack2.add(stack1.pop());
+				}
+				// 剔除这一对括号
+				stack1.pop();
+			} else {
+				/**
+				 * 当item的优先级小于等于栈顶运算符的优先级
+				 * 将stack1栈顶的运算符弹出并加入到stack2中
+				 * 在次转到(4,1)与stack1中新的栈顶运算符相比较
+				 */
+				while(stack1.size() != 0 && Operation.getValue(stack1.peek()) >= Operation.getValue(item)) {
+					stack2.add(stack1.pop());
+				}
+				// 把item运算符压入栈中
+				stack1.push(item);
+			}
+		}
+		// 将stack1中剩余的运算发依次弹出加入到stack2中
+		while(stack1.size() != 0) {
+			stack2.add(stack1.pop());
+		}
+		
+		return stack2;
+	}
+	/**
+	 * @param expression 中缀表达式
+	 * @return 返回中缀表达式字符List
+	 */
+	public static List<String> infixToList(String expression){
+		// 去除所有空格
+		expression = expression.replace(" ", "");
+
+		// 提取出所有的数学符号，即剔除数字\\d*
+		String operator = expression.replaceAll("\\d+\\.?\\d*", "");  
+
+        List<String> list=new ArrayList<String>();  
+        int pidx = -1;  
+        for(int i=0; i<operator.length(); i++){  
+            String p = operator.substring(i, i+1);  
+            pidx = expression.indexOf(p);  
+            if(expression.substring(0,pidx).trim().length() != 0){  
+                list.add(expression.substring(0, pidx));  
+            }  
+            list.add(expression.substring(pidx, pidx+1));  
+            expression = expression.substring(pidx+1);  
+        }  
+        if(expression.length()>0){  
+            list.add(expression);  
+        }  
+		return list;
+	}
+	
+    // 比较运算符优先级的内部类
+	private static class Operation {
+		private static final int ADD = 1; 
+		private static final int SUB = 1;
+		private static final int MUL = 2;
+		private static final int DIVSION = 2;
+		
+		// 返回对应的优先级数字
+		public static int getValue(String operation) {
+			int result = 0;
+			switch (operation) {
+			case "+":
+				result = ADD;
+				break;
+			case "-":
+				result = SUB;
+				break;
+			case "*":
+				result = MUL;
+				break;
+			case "/":
+				result = DIVSION;
+				break;
+			default:
+				break;
+			}
+			return result;
+		}
+	}
+    
+    public static double calculate(List<String> list) {
+		// 创建一个栈
+		Stack<String> stack = new Stack<String>();
+		// 遍历list
+		for(String item : list) {
+			// 正则匹配数字
+			if(item.matches("\\d+\\.?\\d*")) {
+				// 将数字入栈
+				stack.push(item);
+			} else {
+				// 由于当前是else说明item是一个符号
+				// pop出两个数，并计算，再入栈
+				double num2 = Double.parseDouble(stack.pop());
+				double num1 = Double.parseDouble(stack.pop());
+				
+				// 计算
+				double result = switchCalc(item, num1, num2);
+				// 入栈
+				stack.push(result + "");
+			}
+		}
+		return Double.parseDouble(stack.pop());
+	}
+    
+    public static void main(String[] args) {
+		/**
+		 * 将中缀表达式转后缀表达式结果测试
+		 */
+		//String expression = "11 + ((2+3)*4)-5";
+		String expression = "(3.2 + 4)*5-6";
+		List<String> suffix = infixToSuffix(expression);
+		double solution = calculate(suffix);
+		System.out.println("中缀转后缀表达式计算结果:" + solution );
 	}
 }
 ```
