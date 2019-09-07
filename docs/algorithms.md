@@ -2095,3 +2095,67 @@ public class BubbleSort {
 }
 ```
 
+### 选择排序
+
+选择排序(Selection-sort)是一种简单直观的排序算法。它的工作原理：首先在未排序序列中找到最小（大）元素，存放到排序序列的起始位置，然后，再从剩余未排序元素中继续寻找最小（大）元素，然后放到已排序序列的末尾。以此类推，直到所有元素均排序完毕。
+
+算法描述：
+
+n个记录的直接选择排序可经过n-1趟直接选择排序得到有序结果。具体算法描述如下：
+
+- 初始状态：无序区为R[1..n]，有序区为空；
+- 第i趟排序(i=1,2,3…n-1)开始时，当前有序区和无序区分别为R[1..i-1]和R(i..n）。该趟排序从当前无序区中-选出关键字最小的记录 R[k]，将它与无序区的第1个记录R交换，使R[1..i]和R[i+1..n)分别变为记录个数增加1个的新有序区和记录个数减少1个的新无序区；
+- n-1趟结束，数组有序化了。
+
+![selection-sort-1433219824](C:/Users/guqin/Desktop/selection-sort-1433219824.gif)
+
+<center><a href="https://www.cnblogs.com/onepixel/articles/7674659.html">图片来源</a></center>
+
+```java
+/**
+ * 选择排序
+ * @author guqing
+ */
+public class SelectionSort {
+	public static void main(String[] args) {
+		int[] array = {3, 44, 38, 5, 47, 15, 36, 
+				26, 27, 2, 46, 4, 19, 50, 48 };
+		// 时间复杂度为O(n^2),两层for循环
+		sort(array);
+		System.out.println(Arrays.toString(array));
+	}
+	
+    /**
+	 * 选择排序主要的思想就是:从第一个位置开始，假设它就是从它之后数最小的
+	 * 然后遍历开始判断是不是真的是最小的，如果不是那就交换它和真正的最小值的位置
+	 * 这样遍历下来每一次遍历就能排序好一个数，下一次循环就从上一次假定的最小值的
+	 * 下一个值开始判断找到真正的最小值与之交换
+	 * 注意：这里说的最小值都是从假定是最小值的那个位置往后找到所谓的最小值，因为
+	 * 假定是最小值的位置之前的数都是排好序的不需要考虑。
+	 * @param array
+	 */
+	public static void sort(int[] array) {
+		for(int i = 0; i < array.length - 1; i++) {
+			int minIndex = i;
+			int min = array[i];
+			for(int j = i + 1; j < array.length; j++) {
+				if(min > array[j]) {
+					// 假设的最小值不是真正的最小
+					// 重置min
+					min = array[j];
+					// 重置minIndex
+					minIndex = j;
+				}
+			}
+			
+			// 将最小值，放在假定的最小值的位置上，而原假定位置的值放在真正的最小值的位置
+			if(minIndex != i) {
+				// 即交换假定的最小值所在位置和真正寻找到的最小值位置上的值
+				array[minIndex] = array[i];
+				array[i] = min;
+			}
+		}
+	}
+}
+```
+

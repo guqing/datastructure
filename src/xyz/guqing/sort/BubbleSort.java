@@ -10,7 +10,7 @@ public class BubbleSort {
 	public static void main(String[] args) {
 		int[] array = {3, 44, 38, 5, 47, 15, 36, 
 				26, 27, 2, 46, 4, 19, 50, 48 };
-		// 测试排序
+		// 测试排序，时间复杂度为O(n^2),两层for循环
 		sort(array);
 		System.out.println("排序后：" + Arrays.toString(array));
 	}
