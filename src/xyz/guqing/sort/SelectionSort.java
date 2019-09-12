@@ -1,6 +1,6 @@
 package xyz.guqing.sort;
 
-import java.util.Arrays;
+import java.util.Random;
 
 /**
  * 选择排序
@@ -8,11 +8,22 @@ import java.util.Arrays;
  */
 public class SelectionSort {
 	public static void main(String[] args) {
-		int[] array = {3, 44, 38, 5, 47, 15, 36, 
-				26, 27, 2, 46, 4, 19, 50, 48 };
+//		int[] array = {3, 44, 38, 5, 47, 15, 36, 
+//				26, 27, 2, 46, 4, 19, 50, 48 };
+//		sort(array);
+//		System.out.println(Arrays.toString(array));
+		
+		int[] array = new int[80000];
+		Random random = new Random();
+		for(int i=0; i<80000; i++) {
+			array[i] = random.nextInt(80000);
+		}
+		
+		long start = System.currentTimeMillis();
 		// 时间复杂度为O(n^2),两层for循环
 		sort(array);
-		System.out.println(Arrays.toString(array));
+		long end = System.currentTimeMillis();
+		System.out.println("排序所需时间：" + (end - start));
 	}
 	
 	/**
