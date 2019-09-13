@@ -2227,3 +2227,55 @@ public class InsertSort {
 
 随机8万数据排序用时`1868毫秒`
 
+### 希尔排序
+
+希尔排序是希尔于1959年提出的一种排序算法。写入排序也是一种插入排序，它是简单插入排序经过改进之后的一个更高效的版本，也称为缩小增量排序。
+
+基本思想：希尔排序是把记录按下表的一定增量分组，对于每组使用直接插入排序算法，随着增量逐渐减少，每组包含的关键词越来越多，当增量减至1时，整个文件恰好被分成一组，算法终止。
+
+![shell_sort](assets/shell_sort.gif)
+
+动画解释：
+
+1. 首先选择增量`gap = 10/2 = 5`，序列按照增量`5`，被划分为`5`组，按颜色划分分别为`[8 , 3 ]，[ 9 , 5 ]，[1 , 4 ]，[7 , 6 ]，[2 , 0 ]`
+2. 对上面5组分别进行插入排序，排序后序列变为 `3、5、1、6、0、8、9、4、7、2 `,可以看到，这五组中的相对小元素都被调到前面了。
+3. 继续缩小增量`gap = 5/2 =2`, 整个序列被分为`2`组` [3 , 1 , 0 , 9 , 7 ]`，`[5 , 6 , 8 , 4 , 2 ]`
+4. 分别对上面两组进行插入排序，排序后的序列变为` 0、1、3、7、 9、 2、 4、 5、 6、 8`
+5. 再缩小增量` gap = 2/2 = 1`,然后对序列进行插入排序，即完成了整个序列的排序。
+
+**交换法希尔排序代码实现：**
+
+```java
+public class ShellSort {
+	public static void main(String[] args) {
+		int[] array = { 8, 9, 1, 7, 2, 3, 5, 4, 6, 0 };
+		sortByExchange(array);
+		System.out.println(Arrays.toString(array));
+	}
+
+	/**
+	 * 交换法的希尔排序
+	 * @param array 需要排序的数组
+	 */
+	public static void sortByExchange(int[] array) {
+		int temp = 0;
+		// 刚开始将数组分为两个一组即分为length/2组，步长gap = length / 2,
+		// 每次循环后缩小步长为原来的一半即gap = gap/2，步长等于0即整个数组被当作一个组时就终止循环
+		for (int gap = array.length / 2; gap > 0; gap /= 2) {
+			for (int i = gap; i < array.length; i++) {
+				// 遍历各组中的所有元素(共gap组),步长为gap
+				for (int j = i - gap; j >= 0; j -= gap) {
+					// 如果当前元素大于加上步长后的那个元素则交换，也就是同一组的两个元素比较
+					if (array[j] > array[j + gap]) {
+						temp = array[j];
+						array[j] = array[j + gap];
+						array[j + gap] = temp;
+					}
+				}
+			}
+		}
+	}
+}
+```
+
+测试：8万数据排序所需时间：`6987毫秒`，很慢
