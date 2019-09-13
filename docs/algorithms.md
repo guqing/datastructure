@@ -2316,3 +2316,61 @@ public class ShellSort {
 
 测试：8万数据排序用时:`16毫秒`
 
+### 快速排序
+
+快速排序是对冒泡排序的一种改进，基本思想是：通过一趟排序将要排序的数据分割成独立的两部分，其中一部分的所有数据都比另外一部分的所有数据都要小，然后在按此方法对着两部分数据分别进行快速排序，整个排序过程可以递归进行，以此达到整个数据变成有序序列。
+
+![quick_sort](assets/quick_sort.gif)
+
+**代码实现：**
+
+```java
+public class QuickSort {
+	public static void main(String[] args) {
+		int[] array = { 3, 44, 38, 5, 47, 15, 36, 26, 27, 2, 46, 4, 19, 50, 48 };
+		sort(array, 0, array.length - 1);
+		System.out.println(Arrays.toString(array));
+	}
+
+	public static void sort(int[] array, int left, int right) {
+		if (left > right) {
+			return;
+		}
+		int temp = 0;
+		int low = left;
+		int high = right;
+		// pivot就是基准位
+		int pivot = array[left];
+
+		// while循环的目的是让比pivot的值小的放到左边
+		// while循环的目的是让比pivot的值大的放到右边
+		while (low < high) {
+			// 先看右边，依次往左递减
+			while (pivot <= array[high] && low < high) {
+				high--;
+			}
+			// 再看左边，依次往右递增
+			while (pivot >= array[low] && low < high) {
+				low++;
+			}
+			// 如果满足条件则交换
+			if (low < high) {
+				temp = array[high];
+				array[high] = array[low];
+				array[low] = temp;
+			}
+
+		}
+		// 最后将基准为与low和high相等位置的数字交换
+		array[left] = array[low];
+		array[low] = pivot;
+		// 递归调用左半数组
+		sort(array, left, high - 1);
+		// 递归调用右半数组
+		sort(array, high + 1, right);
+	}
+}
+```
+
+测试：8万数据排序用时：`25毫秒`
+
