@@ -2973,3 +2973,123 @@ public class InterpolationSearch {
 }
 ```
 
+### 斐波那契查找算法(黄金分割法)
+
+1. 黄金分割点是指把一条线段分割为两部分，是其中一部分于全长之比等于另一部分之比，取其前三位数字的近似值是0.618,由于按此比例设计的造型十分美丽，因此称为黄金分割，也称为中外比，这是一个神奇的数字，会带来意想不到的效果。
+2. 斐波那契数列`{1,1,2,3,5,8,13,21,34,55}`发现斐波那契数列的两个相邻数的比例，无限接近黄金分割值0.618
+
+斐波那契查找原理：
+
+斐波那契查找原理于前两种相似，仅仅改变了中间节点mid的位置，mid不再是中间值或插值得到，而是位于黄金分割点附近，即`mid = low + F(k-1)-1`（F表示斐波那契数列）
+
+对`F(k-1)-1`的理解：
+
+![1568637694479](assets/1568637694479.png)
+
+1. 由斐波那契数列`F(k)=F(k-1)+F(k-2)`的性质可以得到`F[k]-1 = (F[k-1]-1) + (F(k-2)-1) + 1`，该式说明：只要顺序表的长度为F[k]-1，则可以将该表分成长度为`F[k-1]-1`和`F[k-2]-1`的两段，如上图所示。从而中间位置`mid=low+F(k-1)-1`
+2. 类似的，每一子段也可以用相同的方式分割
+3. 但是顺序表的长度m不一定刚好等于F[k]-1,所以需要将原来的顺序表长度n增加至F[k]-1。这里的k值只要能使得F[k]-1恰好大于或等于n即可。由一下代码得到，顺序表的长度增加后，新增加的位置(从n+1到F[k]-1位置)，都赋为n为位置的值即可。
+
+```java
+while(n>fib(k-1)) {
+    k++;
+}
+```
+
+**代码实现：**
+
+```java
+/**
+ * 斐波那契查找
+ * 
+ * @author guqing
+ */
+public class FibonacciSearch {
+	/**
+	 * 斐波那契数列的长度
+	 */
+	private static final int MAXSIZE = 20;
+	
+	public static void main(String[] args) {
+		int[] array = { 1, 8, 10, 89, 540, 1231 };
+		System.out.println(search(array, 10));
+	}
+
+	public static int search(int[] array, int key) {
+		int low = 0;
+		int high = array.length - 1;
+		// 斐波那契数列对应的k值
+		int k = 0;
+		
+		// 因为mid = low + F(k-1)-1,所以需要一个斐波那契数列
+		int[] fib = getFibonacciArray();
+		// 获取斐波那契分割数值的下标
+		while (high > fib[k] - 1) {
+			k++;
+		}
+		
+		// 因为fib[k]值可能大于数组长度，所以需要使用一个Arrays类构建一个新的数组,类似于数组扩容
+		int[] temp = Arrays.copyOf(array, fib[k]);
+
+		// 对temp数组中没有值的部分使用array中最后一个值填充
+		for (int i = high + 1; i < temp.length; i++) {
+			// 因为high=array.length-1所以array[high]就是最后一个值
+			temp[i] = array[high];
+		}
+
+		while (low <= high) {
+			// 计算mid
+			int mid = low + fib[k - 1] - 1;
+
+			// 这里与二分查找不同的地方是使用temp数组
+			if (key < temp[mid]) {
+				// key在mid的左边
+				high = mid - 1;
+				/**
+				 * 为什么k--
+				 * 1.全部元素 = mid之前的元素 + mid之后的元素
+				 * 2.fib[k] = fib[k-1] + fib[k-2]
+				 * 因为前面由fib[k-1]个元素，所以可以继续拆分fib[k-1] = f[k-2] + f[k-3]
+				 * 即在fib[k-1]的前面继续查找，也就是k--
+				 */
+				k--;
+			} else if (key > temp[mid]) {
+				// key在mid的右边
+				low = mid + 1;
+				/**
+				 * 为什么是k-2
+				 * 1.全部元素 = mid之前的元素 + mid之后的元素
+				 * 2.fib[k] = fib[k-1] + fib[k-2] 
+				 * 因为后面有fib[k-2]个元素,所以可以继续拆分为fib[k-1] = f[k-3] + f[k-4]
+				 * 即在f[k-2]的前面进行查找k-=2 即下次循环mid=f[k-1-2]-1
+				 */
+				k -= 2;
+			} else {
+				// 找到后，需要确定返回的是哪个下标
+				if (mid <= high) {
+					return mid;
+				} else {
+					return high;
+				}
+			}
+		}
+		return -1;
+	}
+
+	/**
+	 * 非递归方式得到一个斐波那契数列
+	 * @param maxSize 数组长度
+	 * @return 返回斐波那契数列
+	 */
+	public static int[] getFibonacciArray() {
+		int[] fib = new int[MAXSIZE];
+		fib[0] = 1;
+		fib[1] = 1;
+		for (int i = 2; i < MAXSIZE; i++) {
+			fib[i] = fib[i - 1] + fib[i - 2];
+		}
+		return fib;
+	}
+}
+```
+
