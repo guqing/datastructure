@@ -11,13 +11,14 @@ import java.util.List;
 public class BinarySearch {
 	public static void main(String[] args) {
 		int[] array = { 1, 8, 8, 8, 10, 12, 12, 12, 12, 89, 1000, 1221 };
+		
 		// 非递归方式
 		System.out.println("非递归查找key=8: " + search(array, 8));
-		
+
 		// 递归方式的二分查找
 		int index = binarySearch(array, 0, array.length - 1, 20);
 		System.out.println("非递归查找key=20: " + index);
-		
+
 		System.out.println("查找满足条件的所有元素key=8: " + searchAll(array, 8));
 	}
 
@@ -35,7 +36,9 @@ public class BinarySearch {
 		int high = array.length - 1;
 		while (low <= high) {
 			// 被查找的键要么不存在，要么必然存在于array[low]-array[high]之间
+			// mid = (low + high)/2 = low + (high - low)/2
 			int mid = low + (high - low) / 2;
+			
 			if (key < array[mid]) {
 				// key在mid的左边
 				high = mid - 1;
@@ -51,10 +54,15 @@ public class BinarySearch {
 
 	/**
 	 * 递归方式的二分查找
-	 * @param array 原数组
-	 * @param left 左边索引
-	 * @param right 右边索引
-	 * @param key 待查找的key值
+	 * 
+	 * @param array
+	 *            原数组
+	 * @param left
+	 *            左边索引
+	 * @param right
+	 *            右边索引
+	 * @param key
+	 *            待查找的key值
 	 * @return 找到返回下标,否则返回-1
 	 */
 	public static int binarySearch(int[] array, int left, int right, int key) {
@@ -78,8 +86,11 @@ public class BinarySearch {
 
 	/**
 	 * 查找满足值为key的所有下标
-	 * @param array 源数组
-	 * @param key 待查找的值
+	 * 
+	 * @param array
+	 *            源数组
+	 * @param key
+	 *            待查找的值
 	 * @return 找到返回所有下边的list集合，否则返回null
 	 */
 	public static List<Integer> searchAll(int[] array, int key) {

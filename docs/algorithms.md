@@ -2765,7 +2765,7 @@ public class OrderSearch {
 
 二分查找算法是对有序数组而言，如果数组无序需要先对数组排序后进行查找。
 
-递归方式思路分析：
+思路分析：
 
 1. 首先确定该数组的中间下标`mid = (left + right)/2`
 2. 然后让需要查找的数key和array[mid]比较
@@ -2890,6 +2890,85 @@ public class BinarySearch {
 		}
 
 		return null;
+	}
+}
+```
+
+### 插值查找
+
+1. 插值查找算法类似于二分查找，不同的是插值算法每次从自适应mid处开始查找
+2. 将折半查找中的求mid索引的公式左变化
+
+$$
+mid= \frac {low + high}2=low + \frac 12(high-low)
+\\
+\Downarrow
+\\
+mid=low + \frac {key-array[low]}{array[high]-array[low]}(high-low)
+$$
+
+也就是把之前二分查找的代码中求mid的地方改为如下即可：
+
+```java
+int mid = low + (high - low)*(key-array[low])/(array[high]-array[low]);
+```
+
+该改进是为了快速找到离目标key最近的mid。
+
+加入需要在如下数组中查找`key=3`
+
+```java
+int[] array = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20};
+```
+
+传统求mid的方式：
+
+```java
+int mid = low + (high - low) / 2;
+首次找到的mid值是：9
+查找需要三次
+```
+
+而插值的计算mid的方式：
+
+```java
+int mid = low + (high - low)*(key-array[low])/(array[high]-array[low]);
+首次找到的mid值是：2
+查找只需要一次
+```
+
+由此可见，使用mid能够快速让mid逼近key值，减少搜索次数。
+
+```java
+/**
+ * 插值查找算法
+ * @author guqing
+ */
+public class InterpolationSearch {
+	public static void main(String[] args) {
+		int[] array = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20 };
+		int index = search(array, 3);
+		System.out.println(index);
+	}
+	
+	public static int search(int[] array, int key) {
+		int low = 0;
+		int high = array.length - 1;
+		while (low <= high) {
+			// 插值查找的mid计算方式
+			int mid = low + (high - low)*(key-array[low])/(array[high]-array[low]);
+			
+			if (key < array[mid]) {
+				// key在mid的左边
+				high = mid - 1;
+			} else if (key > array[mid]) {
+				// key在mid的右边
+				low = mid + 1;
+			} else {
+				return mid;
+			}
+		}
+		return -1;
 	}
 }
 ```
