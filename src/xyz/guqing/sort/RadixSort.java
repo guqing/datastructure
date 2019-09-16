@@ -12,6 +12,7 @@ public class RadixSort {
 		int[] array = { 53, 3, 542, 748, 214 };
 		sort(array);
 		System.out.println(Arrays.toString(array));
+		
 	}
 
 	public static void sort(int[] array) {

@@ -2716,3 +2716,48 @@ public class RadixSort {
 ```
 
 测试：随机8万数据排序所需时间`24毫秒`
+
+值得注意的是由于上述基数排序在分配内存时总共有`11`个`int`数组长度是一样的，所以堆内存的消耗很大，尽管速度很快，但是如果数组长度太大就会导致`OOM`异常。
+
+## 查找算法
+
+在Java中**常用**的查找方式有四种：
+
+1. 顺序查找
+2. 二分查找/折半查找
+3. 插值查找
+4. 斐波那契查找
+
+### 线性查找算法
+
+```java
+/**
+ * 顺序查找
+ * @author guqing
+ */
+public class OrderSearch {
+	public static void main(String[] args) {
+		int[] array = {1,9,11,-1,34,89};
+		int index = search(array, 11);
+		if(index == -1) {
+			System.out.println("没有查找到对应值");
+		} else {
+			System.out.println("找到该值，下标为:" + index);
+		}
+	}
+	/**
+	 * @param array 待查找的数组
+	 * @param value 需要查找的值
+	 * @return 查找到一个满足条件值就返回该值对应的下标，查找结束，如果没有找到返回-1
+	 */
+	public static int search(int[] array, int value) {
+		for(int i=0; i<array.length; i++) {
+			if(array[i] == value) {
+				return i;
+			}
+		}
+		return -1;
+	}
+}
+```
+
