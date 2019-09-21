@@ -3753,3 +3753,676 @@ System.out.println("树的深度:" + tree.depth());
 二叉树的一个重要应用是它在查找中的使用，使二叉树成为二叉查找树的性质也就是之前创建二叉树所使用到的那个创建规则，归纳来说：对于树中的每个节点X，它的左子树中所有关键字值小于X的关键字值，而它的右子树值大于X的关键字值。
 
 由于上面二叉树遍历时已经使用了两种方式遍历，从遍历的方式中也可以看出，一棵排序的二叉树想要查找某个值也是轻而易举的，与上面节点只存储值的结构不同，这次定义`K,V`结构，由于是键值，查找便可以根据`K`查找`V`,也能凸显二叉查找树的作用。
+
+![152203lavvxvvviezkalda](assets/152203lavvxvvviezkalda.gif)
+
+
+
+### 查找和插入
+
+首先创建二叉查找树的基本类结构
+
+```java
+public class BinarySearchTree<K extends Comparable<K>, V> {
+	private Node<K, V> root;
+
+	private static class Node<K, V> {
+		private K key;
+		private V value;
+		private Node<K, V> left;
+		private Node<K, V> right;
+		// 以该节点为根的子树中的节点总数
+		private int count;
+
+		public Node(K key, V value, int count) {
+			this.key = key;
+			this.value = value;
+			this.count = count;
+		}
+	}
+    
+    public int size() {
+		return size(root);
+	}
+
+	private int size(Node<K, V> node) {
+		if (node == null) {
+			return 0;
+		}
+		return node.count;
+	}
+    
+    public V get(K key) {
+        // 见后续
+    }
+    public void put(K key, V value){
+        // 见后续
+    }
+    // max() min() floor() ceiling()
+    // select() rank()
+    // delete() deleteMin() deleteMax()
+    // keys()
+```
+
+二叉查找树的get和put方法实现
+
+```java
+
+public V get(K key) {
+    return get(root, key);
+}
+
+/**
+ * 在以parent为根节点的子树中查找并返回key所对应的值
+ * 
+ * @param parent
+ *            父节点
+ * @param key
+ *            查找的key
+ * @return 找到返回value,否则返回null
+ */
+private V get(Node<K, V> parent, K key) {
+    if (parent == null) {
+        return null;
+    }
+    int cmp = key.compareTo(parent.key);
+    if (cmp < 0) {
+        // 查找左子树
+        return get(parent.left, key);
+    } else if (cmp > 0) {
+        // 查找右子树
+        return get(parent.right, key);
+    } else {
+        return parent.value;
+    }
+}
+
+public void put(K key, V value) {
+    // 查找key，如果查找则更新它的值，否则为它创建一个新节点
+    root = put(root, key, value);
+}
+
+/**
+ * 如果key存在与以parent为父节点的子树中则更新它的值
+ * 否则将以key和value为键值创建对应的新节点插入到该子树中
+ * 
+ * @param parent
+ * @param key
+ * @param value
+ * @return
+ */
+private Node<K, V> put(Node<K, V> parent, K key, V value) {
+    if (parent == null) {
+        return new Node<>(key, value, 1);
+    }
+    int cmp = key.compareTo(parent.key);
+    if (cmp < 0) {
+        parent.left = put(parent.left, key, value);
+    } else if (cmp > 0) {
+        parent.right = put(parent.right, key, value);
+    } else {
+        parent.value = value;
+    }
+    // 在一次又一次的递归中更新以该节点为父节点的子树节点总数,因为put一次新创建节点的祖先节点对应的count都需要+1
+    parent.count = size(parent.left) + size(parent.right) + 1;
+    return parent;
+}
+```
+
+![1569067254361](assets/1569067254361.png)
+
+二叉查找树的插入方式如上图，将递归调用前的代码想象成沿着树向下走：它会将给定的键和每个节点的键相比较并根据结果向左后者向右移动到下一个节点。然后可以将递归调用后的代码想象成沿着树向上爬。对于get()方法，这对应着一系列的返回指令(return)但是对于put()方法，这意味着重置搜索路径上每个父节点指向子节点的链接，并增加路径中么个节点的计数器的值。在一棵简单的二叉查找树中，唯一的新连接就是在最底层指向新节点的链接，重置更上层的链接可以通过比较语句来避免，同样，我们需要将路径上每个节点中的计数器的值加 1，但我们使用了更加通用的代码，使之等于节点的所有子节点的计数器之和加 1。但是基本的二叉查找树的实现通常是非递归的，使用递归遍历理解代码的工作方式。
+
+### 有序性相关方法
+
+二叉查找树的最大键、最小键以及向上取整和向下取整：
+
+计算floor()函数如下图所示
+
+![1569067612566](assets/1569067612566.png)
+
+```java
+public K min() {
+    return min(root).key;
+}
+
+/**
+ * 获取最小键,如果根节点的左链接为空，那么一棵二叉查找树
+ * 中最小的键就是根节点，如果左链接非空，那么树中最小键
+ * 就是左子树中的最小键
+ * 
+ * @return
+ */
+private Node<K, V> min(Node<K, V> parent) {
+    if (parent.left == null) {
+        return parent;
+    }
+    return min(parent.left);
+}
+
+public K max() {
+    return max(root).key;
+}
+
+/**
+ * 只是在min()的基础上将left和right调换 并将> 和 < 调换即可
+ * 
+ * @return 返回最大节点
+ */
+private Node<K, V> max(Node<K, V> parent) {
+    if (parent.right == null) {
+        return parent;
+    }
+    return max(parent.right);
+}
+
+/**
+ * 向下取整
+ * 
+ * @param key
+ *            向下取整的key
+ * @return 返回向下取整的key,没有找到返回null
+ */
+public K floor(K key) {
+    Node<K, V> node = floor(root, key);
+    if (node != null) {
+        return node.key;
+    }
+    return null;
+}
+
+/**
+ * 如果给定的键key小于二叉查找树的根节点的键
+ * 那么小于等于key的最大键floor(key)一定在
+ * 根节点的左子树中;如果给定的键key大于二叉查
+ * 找树的根节点，那么只有当根节点右子树中存在
+ * 小于等于key的节点时,小于等于key的最大键才
+ * 会出现在右子树中,否则根节点就是小于等于key
+ * 的最大键
+ * 
+ * @return
+ */
+private Node<K, V> floor(Node<K, V> parent, K key) {
+    if (parent == null) {
+        return null;
+    }
+
+    int cmp = key.compareTo(parent.key);
+
+    if (cmp == 0) {
+        // 相等
+        return parent;
+    }
+    // 在左子树寻找
+    if (cmp < 0) {
+        return floor(parent.left, key);
+    }
+
+    Node<K, V> temp = floor(parent.right, key);
+    if (temp != null) {
+        return temp;
+    }
+
+    return parent;
+}
+
+/**
+ * 向上取整
+ * 
+ * @param key
+ *            向上取整的key
+ * @return 返回向上取整得到的key,没有找到返回null
+ */
+public K ceiling(K key) {
+    Node<K, V> node = ceiling(root, key);
+    if (node != null) {
+        return node.key;
+    }
+    return null;
+}
+
+/**
+ * 在floor()的代码上将>和<互换以及left和right互换实现
+ * 
+ * @param parent
+ *            父节点
+ * @param key
+ *            查找的key
+ * @return 返回向上取整的节点
+ */
+public Node<K, V> ceiling(Node<K, V> parent, K key) {
+    if (parent == null) {
+        return null;
+    }
+
+    int cmp = key.compareTo(parent.key);
+
+    if (cmp == 0) {
+        // 相等
+        return parent;
+    }
+    // 在右子树寻找
+    if (cmp > 0) {
+        return floor(parent.right, key);
+    }
+
+    Node<K, V> temp = floor(parent.left, key);
+    if (temp != null) {
+        return temp;
+    }
+
+    return parent;
+}
+```
+
+### 排名
+
+rank()是select()的逆方法,它会返回给定键的排名，它的实现和select(）相似，如果给定键等于根节点上的键，则返回左子树中的节点总数`t`;如果给定的键小于根节点上的键，则返回左子树中键的排名(递归计算);如果给定的键大于根上的键，则返回`t + 1`(计算根节点上的键)加上右子树中键的排名(递归计算)。
+
+![1569068307219](assets/1569068307219.png)
+
+```java
+public K select(int k) {
+    Node<K, V> node = select(root, k);
+    if (node != null) {
+        return node.key;
+    }
+    return null;
+}
+
+/**
+ * 返回排名为k的节点
+ * 
+ * @param parent
+ *            父节点
+ * @param k
+ *            排名
+ * @return 返回排名为k的节点,未找到返回null
+ */
+private Node<K, V> select(Node<K, V> parent, int k) {
+    if (parent == null) {
+        return null;
+    }
+    int count = size(parent.left);
+    if (count > k) {
+        return select(parent.left, k);
+    } else if (count < k) {
+        return select(parent.right, k - count - 1);
+    } else {
+        return parent;
+    }
+}
+
+/**
+ * @param key
+ * @return 返回以root为节点的子树中小于root.key的数量
+ */
+public int rank(K key) {
+    return rank(root, key);
+}
+
+/**
+ * @param parent
+ * @param key
+ * @return 返回以parent为节点的子树中小于parent.key的数量
+ */
+private int rank(Node<K, V> parent, K key) {
+    if (parent == null) {
+        return 0;
+    }
+    int cmp = key.compareTo(parent.key);
+    if (cmp < 0) {
+        return rank(parent.left, key);
+    } else if (cmp > 0) {
+        return 1 + size(parent.left) + rank(parent.right, key);
+    } else {
+        return size(parent.left);
+    }
+}
+```
+
+### 删除
+
+删除有三种情况：
+
+1. 删除节点为叶子节点，直接删除(删除72)
+
+![19655822084261](assets/19655822084261.gif)
+
+2. 删除节点只有一个子节点：只有一个左子节点或者只有一个右子节点（删除79）
+
+![1965332581496](assets/1965332581496.gif)
+
+3. 删除节点有两个子节点：删除的节点包含两个子节点(在该节点的右子树中寻找最小节点，替换为该节点元素，然后删除右子树元素最小的节点)，看一个例子：
+
+节点p的左子树和右子树均不为空：首先找到p的后继y，因为y一定没有左子树，所以可以删除y，并让y的父亲节点成为y的右子树的父亲节点，并用y的值代替p的值；或者可以先找到p的前驱x，x一定没有右子树，所以可以删除x，并让x的父亲节点成为y的左子树的父亲节点
+
+![196558871752535](assets/196558871752535.png)
+
+![196558581225916](assets/196558581225916.gif)
+
+**具体代码：**
+
+删除最小键图：
+
+![1569068378256](assets/1569068378256.png)
+
+删除节点图解：
+
+![1569068348571](assets/1569068348571.png)
+
+```java
+public void delete(K key) {
+    root = delete(root, key);
+}
+
+private Node<K, V> delete(Node<K, V> parent, K key) {
+    if (parent == null) {
+        return null;
+    }
+    int cmp = key.compareTo(parent.key);
+    if (cmp < 0) {
+        parent.left = delete(parent.left, key);
+    } else if (cmp > 0) {
+        parent.right = delete(parent.right, key);
+    } else {
+        // 这里就是删除对应的三种情况
+        if (parent.right == null) {
+            return parent.left;
+        }
+
+        if (parent.left == null) {
+            return parent.right;
+        }
+
+        Node<K, V> temp = parent;
+        // 找到最小节点并删除最小节点
+        parent = min(temp.right);
+        parent.right = deleteMin(temp.right);
+
+        parent.left = temp.left;
+    }
+    parent.count = size(parent.left) + size(parent.right) + 1;
+    return parent;
+}
+
+/**
+ * 删除最小键
+ */
+public void deleteMin() {
+    root = deleteMin(root);
+}
+
+private Node<K, V> deleteMin(Node<K, V> parent) {
+    if (parent.left == null) {
+        return parent.right;
+    }
+    parent.left = deleteMin(parent.left);
+    // 同样的删除也需要逐一更新节点的count
+    parent.count = size(parent.left) + size(parent.right) + 1;
+    return parent;
+}
+
+/**
+ * 删除最大键
+ */
+public void deleteMax() {
+    root = deleteMax(root);
+}
+
+/**
+ * 与deleteMin类似只需要将left和right互换即可
+ * 
+ * @param parent
+ * @return
+ */
+private Node<K, V> deleteMax(Node<K, V> parent) {
+    if (parent.right == null) {
+        return parent.left;
+    }
+    parent.right = deleteMax(parent.right);
+    // 同样的删除也需要逐一更新节点的count
+    parent.count = size(parent.left) + size(parent.right) + 1;
+    return parent;
+}
+```
+
+### 范围查找
+
+下图为在F和T之间进行范围查询的过程：
+
+![1569069742917](assets/1569069742917.png)
+
+为了实现接受两个参数并能够将给定范围内的键返回给用例的keys()方法，我们修改了这段代码，将所有落在给定范围内的每个键添加到有序集合或者队列中，并跳过那些不可能含有所查找键的子树。我们不需要知道具体使用什么数据结构来实现`Iterable<Key>`，只要能够使用Java的foreach构造器遍历即可，所以返回`Iterable<Key>`。
+
+```java
+/**
+ * @return 返回所有的key
+ */
+public Iterable<K> keys() {
+    return keys(min(), max());
+}
+
+/**
+ * 范围查找
+ * 
+ * @param low
+ * @param high
+ * @return
+ */
+public Iterable<K> keys(K low, K high) {
+    List<K> list = new ArrayList<>();
+    keys(root, list, low, high);
+    return list;
+}
+
+private void keys(Node<K, V> parent, List<K> list, K low, K high) {
+    if (parent == null) {
+        return;
+    }
+
+    int cmpLow = low.compareTo(parent.key);
+    int cmpHigh = high.compareTo(parent.key);
+
+    if (cmpLow < 0) {
+        keys(parent.left, list, low, high);
+    }
+
+    if (cmpLow <= 0 && cmpHigh >= 0) {
+        list.add(parent.key);
+    }
+
+    if (cmpHigh > 0) {
+        keys(parent.right, list, low, high);
+    }
+}
+```
+
+### 遍历
+
+为了测试方便，我么需要将树的结构有序的打印出来，所以使用中序遍历，就不在实现其他遍历方式
+
+```java
+public String inorder() {
+    Map<K, V> map = new LinkedHashMap<>();
+
+    Stack<Node<K, V>> stack = new Stack<>();
+
+    Node<K, V> current = root;
+    while (current != null || !stack.isEmpty()) {
+        while (current != null) {
+            stack.push(current);
+            current = current.left;
+        }
+        if (!stack.isEmpty()) {
+            current = stack.pop();
+            map.put(current.key, current.value);
+            current = current.right;
+        }
+    }
+
+    return map.toString();
+}
+```
+
+### 测试
+
+```java
+
+public class BSTTest {
+	private BinarySearchTree<String, User> tree = new BinarySearchTree<>();
+	@Before
+	public void prepareData() {
+		User user6 = new User();
+		user6.setId(6);
+		user6.setUsername("王五");
+		
+		User user2 = new User();
+		user2.setId(2);
+		user2.setUsername("zhangsan");
+		
+		User user1 = new User();
+		user1.setId(1);
+		user1.setUsername("李四");
+		
+		User user5 = new User();
+		user5.setId(5);
+		user5.setUsername("王二狗");
+		
+		User user3 = new User();
+		user3.setId(3);
+		user3.setUsername("赵六");
+		
+		User user4 = new User();
+		user4.setId(4);
+		user4.setUsername("唐三藏");
+		
+		User user7 = new User();
+		user7.setId(7);
+		user7.setUsername("孙悟空");
+		
+		User user8 = new User();
+		user8.setId(8);
+		user8.setUsername("猪八戒");
+		
+		//A1 B2 C3 D4 E5 F6 G7 H8
+		//I9 J10 K11 L12 M13 N14 O15 P16 Q17 R18 S19 T20 U21 V22 W23 X24
+		//A1 D4 E5 G7 H8 R18 M13 S19 X24
+		tree.put("F", user6);
+		tree.put("B", user2);
+		tree.put("A", user1);
+		tree.put("E", user5);
+		tree.put("C", user3);
+		tree.put("D", user4);
+		tree.put("G", user7);
+		tree.put("H", user8);
+		
+		// tree.put("S", user6);
+		// tree.put("E", user2);
+		// tree.put("A", user1);
+		// tree.put("C", user5);
+		// tree.put("R", user3);
+		// tree.put("H", user4);
+		// tree.put("M", user7);
+		// tree.put("X", user8);
+		
+		/**
+		 * 树结构：
+		 *      F
+		 * 	 B     G
+		 * A    E    H
+		 *     C
+		 *      D
+		 */
+	}
+	
+	@Test
+	public void testInorder() {
+		// 中序遍历是按正常排序，因为打印是A B C D E F G H
+		System.out.println(tree.inorder());
+	}
+	
+	@Test
+	public void testGet() {
+		// id=1
+		System.out.println(tree.get("A"));
+		// id=2
+		System.out.println(tree.get("B"));
+		// id=3
+		System.out.println(tree.get("C"));
+		// id=4
+		System.out.println(tree.get("D"));
+	}
+	
+	@Test
+	public void testSize() {
+		System.out.println("树节点个数：" + tree.size());
+	}
+	
+	@Test
+	public void testKeys() {
+		// keys:[A, B, C, D, E, F, G, H]
+		System.out.println("keys:" + tree.keys());
+		// keyByRang:[A, B, C, D]
+		System.out.println("keyByRang:" + tree.keys("A", "D"));
+	}
+	
+	@Test
+	public void testMinAndMax() {
+		System.out.println("min:" + tree.min());
+		System.out.println("max:" + tree.max());
+	}
+	
+	@Test
+	public void testDelete() {
+		// 中序遍历[A, B, C, D, E, F, G, H]
+		System.out.println(tree.keys());
+		// 删除最小key
+		tree.deleteMin();
+		// 删除最大key
+		tree.deleteMax();
+		
+		// 执行key删除,删除父节点B
+		tree.delete("B");
+		
+		// [C, D, E, F, G]
+		System.out.println(tree.keys());
+	}
+	
+	@Test
+	public void testRankAndSelect() {
+		// 返回指定键的排名:0,1,2,3
+		System.out.println(tree.rank("A"));
+		System.out.println(tree.rank("B"));
+		System.out.println(tree.rank("C"));
+		System.out.println(tree.rank("D"));
+		
+		// 返回排名为k的键,和rank()功能正好相反
+		System.out.println(tree.select(0));
+		System.out.println(tree.select(1));
+		System.out.println(tree.select(2));
+		System.out.println(tree.select(3));
+	}
+	
+	@Test
+	public void testFloorAndCeiling() {
+		/**
+		 * 为了测试处向上取整和向下取整需要存储的数据不连续才能看到效果
+		 * 因此重新构建一棵树
+		 * 树结构：S E A C R H M X
+		 *      S
+		 * 	 E     X
+		 * A     R
+		 *  C  H
+		 *       M
+		 */
+		// 结果E
+		System.out.println(tree.floor("G"));
+		// 结果：M
+		System.out.println(tree.ceiling("P"));
+	}
+}
+```
+
+
+

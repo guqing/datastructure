@@ -4,7 +4,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class BSTTest {
-	private static BinarySearchTree<String, User> tree = new BinarySearchTree<>();
+	private BinarySearchTree<String, User> tree = new BinarySearchTree<>();
 	@Before
 	public void prepareData() {
 		User user6 = new User();
@@ -51,14 +51,14 @@ public class BSTTest {
 		tree.put("G", user7);
 		tree.put("H", user8);
 		
-//		tree.put("S", user6);
-//		tree.put("E", user2);
-//		tree.put("A", user1);
-//		tree.put("C", user5);
-//		tree.put("R", user3);
-//		tree.put("H", user4);
-//		tree.put("M", user7);
-//		tree.put("X", user8);
+		// tree.put("S", user6);
+		// tree.put("E", user2);
+		// tree.put("A", user1);
+		// tree.put("C", user5);
+		// tree.put("R", user3);
+		// tree.put("H", user4);
+		// tree.put("M", user7);
+		// tree.put("X", user8);
 		
 		/**
 		 * 树结构：
