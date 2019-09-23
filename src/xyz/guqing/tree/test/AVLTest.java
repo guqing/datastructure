@@ -1,10 +1,12 @@
-package xyz.guqing.tree;
+package xyz.guqing.tree.test;
 
 import org.junit.Before;
 import org.junit.Test;
 
+import xyz.guqing.tree.AVLTree;
+
 public class AVLTest {
-	private AVLTree<String, User> tree = new AVLTree<>();
+	private AVLTree<Integer, User> tree = new AVLTree<>();
 	@Before
 	public void before() {
 		User user6 = new User();
@@ -39,31 +41,35 @@ public class AVLTest {
 		user8.setId(8);
 		user8.setUsername("猪八戒");
 		
-//		tree.put("4", user6);
-//		tree.put("3", user2);
-//		tree.put("6", user1);
-//		tree.put("5", user5);
-//		tree.put("7", user3);
-//		tree.put("8", user4);
+//		tree.put(4, user6);
+//		tree.put(3, user2);
+//		tree.put(6, user1);
+//		tree.put(5, user5);
+//		tree.put(7, user3);
+//		tree.printTree();
+//		tree.put(8, user4);
 		
-		tree.put("10", user6);
-		tree.put("12", user2);
-		tree.put("8", user1);
-		tree.put("9", user5);
-		tree.put("7", user3);
-		tree.put("6", user4);
+//		tree.put(10, user6);
+//		tree.put(12, user2);
+//		tree.put(8, user1);
+//		tree.put(9, user5);
+//		tree.put(7, user3);
+//		tree.printTree();
+//		tree.put(6, user4);
 		
-//		tree.put("10", user6);
-//		tree.put("7", user2);
-//		tree.put("11", user1);
-//		tree.put("6", user5);
-//		tree.put("8", user3);
-//		tree.put("9", user4);
+		tree.put(10, user6);
+		tree.put(7, user2);
+		tree.put(11, user1);
+		tree.put(6, user5);
+		tree.put(8, user3);
+		tree.printTree();
+		tree.put(9, user4);
 	}
 	
 	@Test
 	public void test() {
 		System.out.println(tree.height());
 		tree.printTree();
+		System.out.println(tree.keys());
 	}
 }

@@ -1,4 +1,4 @@
-package xyz.guqing.tree;
+package xyz.guqing.tree.test;
 
 public class User implements Comparable<User>{
 	private Integer id;

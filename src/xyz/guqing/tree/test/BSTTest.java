@@ -1,7 +1,9 @@
-package xyz.guqing.tree;
+package xyz.guqing.tree.test;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import xyz.guqing.tree.BinarySearchTree;
 
 public class BSTTest {
 	private BinarySearchTree<String, User> tree = new BinarySearchTree<>();

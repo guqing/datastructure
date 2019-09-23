@@ -8,7 +8,7 @@ import java.util.Stack;
 
 /**
  * 平衡查找树
- * 
+ * TODO 双旋代码有问题
  * @author guqing
  */
 public class AVLTree<K extends Comparable<K>, V> {
@@ -96,36 +96,46 @@ public class AVLTree<K extends Comparable<K>, V> {
 			parent.value = value;
 		}
 		
-		if(height(parent.right) - height(parent.left) > 1) {
-			// 如果它的右子树的左子树的高度大于它的右子树的高度
-			if(height(parent.right.left) > height(parent.right)) {
-				// 先对当前节点的右子节点进行右旋转
-				parent = leftRotate(parent.right);
-				// 在对当前节点进行左旋转
-				parent = leftRotate(parent);
-			} else {
-				// 左旋
-				parent = leftRotate(parent);
-			}
-		}
-		
-		if(height(parent.left) - height(parent.right) > 1) {
-			// 如果它的左子树的右子树的高度大于它的左子树的高度
-			if(height(parent.left.right) > height(parent.left)) {
-				// 先对当前节点的左节点进行左旋转
-				parent = leftRotate(parent.left);
-				// 在对当前节点进行右旋转
-				parent = rightRotate(parent);
-			} else {
-				parent = rightRotate(parent);
-			}
-		}
+		parent = balance(parent);
 		
 		// 在一次又一次的递归中更新以该节点为父节点的子树节点总数,因为put一次新创建节点的祖先节点对应的count都需要+1
 		parent.count = size(parent.left) + size(parent.right) + 1;
 		return parent;
 	}
 
+	private Node<K,V> balance(Node<K,V> parent) {
+		if (parent == null) {
+	        return parent;
+	    }
+	    // 左子树高度比右子树高度大1以上
+		//当添加完一个结点后，如果: (右子树的高度-左子树的高度) > 1 , 左旋转
+		if(height(parent.right) - height(parent.left) > 1) {
+			//如果它的右子树的左子树的高度大于它的右子树的右子树的高度
+			if(height(parent.right.left) > height(parent.right.right)) {
+				//先对右子结点进行右旋转
+				parent = rightRotate(parent.right);
+				//然后在对当前结点进行左旋转
+				parent = leftRotate(parent);
+			} else {
+				//直接进行左旋转即可
+				parent = leftRotate(parent);
+			}
+		} else if(height(parent.left) - height(parent.right) > 1) {
+			//当添加完一个结点后，如果 (左子树的高度 - 右子树的高度) > 1, 右旋转
+			//如果它的左子树的右子树高度大于它的左子树的高度
+			if(height(parent.left.right) > height(parent.left.left)) {
+				//先对当前结点的左结点(左子树)->左旋转
+				parent = leftRotate(parent.left);
+				//再对当前结点进行右旋转
+				parent = rightRotate(parent);
+			} else {
+				//直接进行右旋转即可
+				parent = rightRotate(parent);
+			}
+		}
+	    return parent;
+	}
+	
 	public K min() {
 		return min(root).key;
 	}

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
+import xyz.guqing.tree.test.User;
+
 /**
  * 二叉树
  * @author guqing
