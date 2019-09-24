@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Stack;
 
+import org.junit.Assert;
+
+
 /**
  * 平衡查找树
  * TODO 双旋代码有问题
@@ -71,7 +74,10 @@ public class AVLTree<K extends Comparable<K>, V> {
 
 	public void put(K key, V value) {
 		// 查找key，如果查找则更新它的值，否则为它创建一个新节点
-		root = put(root, key, value);
+	    if (key == null) {
+	        throw new NullPointerException();
+	    }
+	    root = put(root, key, value);
 	}
 
 	/**
@@ -83,58 +89,183 @@ public class AVLTree<K extends Comparable<K>, V> {
 	 * @param value
 	 * @return
 	 */
-	private Node<K, V> put(Node<K, V> parent, K key, V value) {
-		if (parent == null) {
-			return new Node<>(key, value, 1);
-		}
-		int cmp = key.compareTo(parent.key);
-		if (cmp < 0) {
-			parent.left = put(parent.left, key, value);
+	private Node<K,V> put(Node<K,V> parent, K key, V value) {
+	    if (parent == null) {
+	        return new Node<>(key, value, 1);
+	    }
+
+	    int cmp = key.compareTo(parent.key);
+	    
+	    if (cmp < 0) {
+	    	parent.left = put(parent.left, key, value);
 		} else if (cmp > 0) {
 			parent.right = put(parent.right, key, value);
 		} else {
 			parent.value = value;
 		}
-		
-		parent = balance(parent);
-		
-		// 在一次又一次的递归中更新以该节点为父节点的子树节点总数,因为put一次新创建节点的祖先节点对应的count都需要+1
-		parent.count = size(parent.left) + size(parent.right) + 1;
-		return parent;
-	}
 
-	private Node<K,V> balance(Node<K,V> parent) {
-		if (parent == null) {
-	        return parent;
+	    // 高度大于1,需要旋转以达平衡
+	    if (Math.abs(height(parent.left) - height(parent.right)) > 1) {
+	    	parent = putBalance(parent);
 	    }
-	    // 左子树高度比右子树高度大1以上
-		//当添加完一个结点后，如果: (右子树的高度-左子树的高度) > 1 , 左旋转
-		if(height(parent.right) - height(parent.left) > 1) {
-			//如果它的右子树的左子树的高度大于它的右子树的右子树的高度
-			if(height(parent.right.left) > height(parent.right.right)) {
-				//先对右子结点进行右旋转
-				parent = rightRotate(parent.right);
-				//然后在对当前结点进行左旋转
-				parent = leftRotate(parent);
-			} else {
-				//直接进行左旋转即可
-				parent = leftRotate(parent);
-			}
-		} else if(height(parent.left) - height(parent.right) > 1) {
-			//当添加完一个结点后，如果 (左子树的高度 - 右子树的高度) > 1, 右旋转
-			//如果它的左子树的右子树高度大于它的左子树的高度
-			if(height(parent.left.right) > height(parent.left.left)) {
-				//先对当前结点的左结点(左子树)->左旋转
-				parent = leftRotate(parent.left);
-				//再对当前结点进行右旋转
-				parent = rightRotate(parent);
-			} else {
-				//直接进行右旋转即可
-				parent = rightRotate(parent);
-			}
-		}
+	    
+	    // 在一次又一次的递归中更新以该节点为父节点的子树节点总数,因为put一次新创建节点的祖先节点对应的count都需要+1
+	    parent.count = size(parent.left) + size(parent.right) + 1;
 	    return parent;
 	}
+
+
+	/**
+	 * 维护平衡查找树的平衡:
+	 * 任意一次插入所能造成平衡查找树的不平衡因素
+	 * 都可以简化为下述四种范型之一:
+	 * <li>LL型</li>
+	 * <li>LR型</li>
+	 * <li>RR型</li>
+	 * <li>RL型</li>
+	 * 根据不平衡的节点通往高度最大的子树的叶子节
+	 * 点时所途经的前两个节点(节点H、节点X）的方向
+	 * 判断具体是哪一种范型从而做相应的旋转
+	 */
+	private Node<K,V> putBalance(Node<K,V> parent) {
+		// 这里可以将LL和LR合并为在一个if里面，独立写方便看
+	    // LL
+	    if (height(parent.left) > height(parent.right) &&
+	            height(parent.left.left) > height(parent.left.right)) {
+	    	// 右旋
+	        parent = rightRotate(parent);
+	        return parent;
+	    }
+	    
+	    // LR
+	    if (height(parent.left) > height(parent.right) &&
+	            height(parent.left.right) > height(parent.left.left)) {
+	    	parent = leftRightRotate(parent);
+	    	return parent;
+	    }
+	    
+	    // RR,RR和RL也可以合并在一个一个if里面独立写方便看
+	    if (height(parent.right) > height(parent.left) &&
+	            height(parent.right.right) > height(parent.right.left)) {
+	    	// 左旋
+	    	parent = leftRotate(parent);
+	    	return parent;
+	    }
+	    
+	    // RL
+	    if (height(parent.right) > height(parent.left) &&
+	            height(parent.right.left) > height(parent.right.right)) {
+	    	// 右左旋
+	    	parent = rightLeftRotate(parent);
+	    	return parent;
+	    }
+	    return parent;
+	}
+	
+	private Node<K,V> deleteBalance(Node<K,V> node) {
+	    // LL & L
+	    if (height(node.left) > height(node.right) &&
+	            height(node.left.left) >= height(node.left.right)) {
+	    	// 右旋
+	    	node = rightRotate(node);
+	    	return node;
+	    }
+	    // LR
+	    if (height(node.left) > height(node.right) &&
+	            height(node.left.right) > height(node.left.left)) {
+	    	// 左右旋
+	    	node = leftRightRotate(node);
+	    	return node;
+	    }
+	    // RR & R
+	    if (height(node.right) > height(node.left) &&
+	            height(node.right.right) >= height(node.right.left)) {
+	    	// 左旋
+	    	node = leftRotate(node);
+	    	return node;
+	    }
+	    // RL
+	    if (height(node.right) > height(node.left) &&
+	            height(node.right.left) > height(node.right.right)) {
+	    	// 右左旋
+	    	node = rightLeftRotate(node);
+	    	return node;
+	    }
+	    return node;
+	}
+	
+	/**
+	 * 左旋转
+	 * @param parent 父节点
+	 * @return 返回修改后的父节点
+	 */
+	private Node<K,V> leftRotate(Node<K,V> parent) {
+		Node<K,V> temp = parent.right;
+		parent.right = temp.left;
+		temp.left = parent;
+		temp.count = parent.count;
+		parent.count = 1 + size(parent.left) + size(parent.right);
+		return temp;
+	}
+	
+	/**
+	 * 右旋转
+	 * @param parent 传入一个父节点
+	 * @return 返回传入的参数节点
+	 */
+	private Node<K,V> rightRotate(Node<K,V> parent) {
+		Node<K,V> temp = parent.left;
+		
+		parent.left = temp.right;
+		temp.right = parent;
+		
+		temp.count = parent.count;
+		
+		parent.count = 1 + size(parent.left) + size(parent.right);
+		return temp;
+	}
+	
+	
+	/**
+	 * 左右旋
+	 * @param parent
+	 * @return
+	 */
+	private Node<K,V> leftRightRotate(Node<K,V> parent) {
+		Node<K,V> nodeH = null;
+	    Node<K,V> nodeX = null;
+		nodeH = parent.left;
+    	nodeX = parent.left.right;
+        parent.left = nodeX.right;
+        nodeH.right = nodeX.left;
+        nodeX.left = nodeH;
+        nodeX.right = parent;
+
+        parent.count = size(parent.left) + size(parent.right) + 1;
+        nodeH.count = size(nodeH.left) + size(nodeH.right) + 1;
+        return nodeX;
+	}
+	
+	/**
+	 * 右左旋
+	 * @param parent
+	 * @return
+	 */
+	private Node<K,V> rightLeftRotate(Node<K,V> parent) {
+		Node<K,V> nodeH = null;
+	    Node<K,V> nodeX = null;
+		nodeH = parent.right;
+    	nodeX = parent.right.left;
+        parent.right = nodeX.left;
+        nodeH.left = nodeX.right;
+        nodeX.left = parent;
+        nodeX.right = nodeH;
+
+        parent.count = size(parent.left) + size(parent.right) + 1;
+        nodeH.count = size(nodeH.left) + size(nodeH.right) + 1;
+        return nodeX;
+	}
+	
 	
 	public K min() {
 		return min(root).key;
@@ -212,11 +343,14 @@ public class AVLTree<K extends Comparable<K>, V> {
 	}
 
 	public int height() {
+		Assert.assertTrue(Math.abs(height(root.left) - height(root.right)) < 2);
+		
 		System.out.println("root节点：" + root.key);
 		System.out.println("左子树的高度：" + height(root.left));
 		System.out.println("右子树的高度：" + height(root.right));
 		return height(root);
 	}
+	
 	/**
 	 * 传入一个父节点返回该节点的高度
 	 * @param parent 父节点
@@ -236,6 +370,10 @@ public class AVLTree<K extends Comparable<K>, V> {
         }
 	}
 	
+	/**
+	 * 中序遍历
+	 * @return 返回中序遍历的字符串结果
+	 */
 	public String inorder() {
 		Map<K, V> map = new LinkedHashMap<>();
 
@@ -257,71 +395,96 @@ public class AVLTree<K extends Comparable<K>, V> {
 		return map.toString();
 	}
 	
-	public void leftRotate() {
-		root = leftRotate(root);
+	/**
+	 * 根据key删除
+	 * @param key
+	 */
+	public void delete(K key) {
+	    if (key == null) {
+	        throw new NullPointerException();
+	    }
+	    root = delete(root, key);
+	}
+
+	private Node<K,V> delete(Node<K,V> node, K key) {
+	    if (node == null) {
+	        return null;
+	    }
+
+	    int cmp = key.compareTo(node.key);
+	    if (cmp < 0) {
+	    	node.left = delete(node.left, key);
+		} else if (cmp > 0) {
+			node.right = delete(node.right, key);
+		} else {
+			// 这里就是删除对应的三种情况
+			if (node.right == null) {
+				return node.left;
+			}
+
+			if (node.left == null) {
+				return node.right;
+			}
+
+			Node<K, V> temp = node;
+			// 找到最小节点并删除最小节点
+			node = min(temp.right);
+			node.right = deleteMin(temp.right);
+
+			node.left = temp.left;
+	    }
+
+	    if (Math.abs(height(node.left) - height(node.right)) > 1) {
+	        node = deleteBalance(node);
+	    }
+	    node.count = 1 + size(node.left) + size(node.right);
+	    return node;
+	}
+
+	
+	/**
+	 * 删除最小键
+	 */
+	public void deleteMin() {
+		root = deleteMin(root);
+	}
+
+	private Node<K, V> deleteMin(Node<K, V> parent) {
+		if (parent.left == null) {
+			return parent.right;
+		}
+		parent.left = deleteMin(parent.left);
+		// 同样的删除也需要逐一更新节点的count
+		parent.count = size(parent.left) + size(parent.right) + 1;
+		return parent;
+	}
+
+	/**
+	 * 删除最大键
+	 */
+	public void deleteMax() {
+		root = deleteMax(root);
+	}
+
+	/**
+	 * 与deleteMin类似只需要将left和right互换即可
+	 * 
+	 * @param parent
+	 * @return
+	 */
+	private Node<K, V> deleteMax(Node<K, V> parent) {
+		if (parent.right == null) {
+			return parent.left;
+		}
+		parent.right = deleteMax(parent.right);
+		// 同样的删除也需要逐一更新节点的count
+		parent.count = size(parent.left) + size(parent.right) + 1;
+		return parent;
 	}
 	
-	public void rightRotate() {
-		root = rightRotate(root);
-	}
-	
-	private Node<K,V> leftRotate1(Node<K,V> parent) {
-		// 创建新的节点,以当前根节点的值创建
-		Node<K,V> temp = new Node<K,V>(parent.key,parent.value,1);
-		// 把新节点的左子树设置为当前节点的左子树
-		temp.left = parent.left;
-		// 把新的节点的右子树设置为当前节点的右子树的左子树
-		temp.right = parent.right.left;
-		// 把当前节点的值替换为右子树的值
-		parent.key = parent.right.key;
-		parent.value = parent.right.value;
-		parent.count = parent.right.count;
-		// 把当前节点的右子树设置成当前节点的右子树的右子树
-		parent.right = parent.right.right;
-		// 把当前节点的左子节点设置为新的节点
-		parent.left = temp;
-		parent.count = 1 + size(parent.left) + size(parent.right);
-		return temp;
-	}
-	
-	private Node<K,V> leftRotate(Node<K,V> parent) {
-		Node<K,V> temp = parent.right;
-		parent.right = temp.left;
-		temp.left = parent;
-		temp.count = parent.count;
-		parent.count = 1 + size(parent.left) + size(parent.right);
-		return temp;
-	}
-	
-	private Node<K,V> rightRotate1(Node<K,V> parent) {
-		Node<K,V> temp = new Node<K,V>(parent.key,parent.value,1);
-		temp.right = parent.right;
-		temp.left = parent.left.right;
-		 
-		parent.key = parent.left.key;
-		parent.value = parent.left.value;
-		parent.count = parent.left.count;
-		
-		parent.left = parent.left.left;
-		
-		parent.right = temp;
-		parent.count = 1 + size(parent.left) + size(parent.right);
-		
-		return temp;
-	}
-	
-	private Node<K,V> rightRotate(Node<K,V> parent) {
-		Node<K,V> temp = parent.left;
-		
-		parent.left = temp.right;
-		temp.right = parent;
-		
-		temp.count = parent.count;
-		
-		parent.count = 1 + size(parent.left) + size(parent.right);
-		return temp;
-	}
-	
+	/**
+	 * 打印树的形状
+	 */
 	public void printTree() {
         //获得二叉树高度
         int height = height(root);
