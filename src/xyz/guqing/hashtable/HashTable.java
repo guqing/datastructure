@@ -1,5 +1,12 @@
 package xyz.guqing.hashtable;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 public class HashTable<K, V> {
 	@SuppressWarnings("rawtypes")
 	private Entry[] table;
@@ -7,6 +14,8 @@ public class HashTable<K, V> {
 	// table表中的元素超过threshold阈值就扩容
 	private int threshold;
 	private float loadFactor;
+	private transient volatile Set<K> keySet;
+	private transient volatile Collection<V> values;
 
 	/**
 	 * 能分配数组的最大长度,0x7fffffff即2的31次方-1
@@ -96,6 +105,10 @@ public class HashTable<K, V> {
 		return size;
 	}
 
+	public synchronized boolean isEmpty() {
+        return size == 0;
+    }
+	
 	@SuppressWarnings("unchecked")
 	private void rehash() {
 		Entry<?, ?>[] oldTable = table;
@@ -139,6 +152,90 @@ public class HashTable<K, V> {
 		}
 	}
 
+	public boolean contains(K key) {
+		return get(key) != null;
+	}
+	
+	public synchronized V remove(K key) {
+		if (!contains(key)) {
+			return null;
+		}
+		Entry<?,?> tab[] = table;
+        int hash = key.hashCode();
+        int index = (hash & 0x7FFFFFFF) % tab.length;
+        @SuppressWarnings("unchecked")
+        Entry<K,V> e = (Entry<K,V>)tab[index];
+        for(Entry<K,V> prev = null ; e != null ; prev = e, e = e.next) {
+            if ((e.hash == hash) && e.key.equals(key)) {
+                if (prev != null) {
+                    prev.next = e.next;
+                } else {
+                    tab[index] = e.next;
+                }
+                size--;
+                V oldValue = e.value;
+                e.value = null;
+                return oldValue;
+            }
+        }
+        return null;
+	}
+	
+	public synchronized void clear() {
+        Entry<?,?> tab[] = table;
+        for (int index = tab.length; --index >= 0; ) {
+        	tab[index] = null;
+        }
+        keySet = null;
+        values = null;
+        size = 0;
+    }
+	
+	public Set<K> keySet() {
+        if (keySet==null) {
+        	keySet = Collections.synchronizedSet(getKeySet());
+        }
+        return keySet;
+    }
+	
+	private synchronized Set<K> getKeySet() {
+		Set<K> keySet = new HashSet<>();
+		@SuppressWarnings("unchecked")
+		Entry<K,V>[] tab = (Entry<K,V>[])table;
+		for(int i=0; i<tab.length; i++) {
+			Entry<K, V> entry = tab[i];
+			while (entry != null) {
+				if (entry.key != null) {
+					keySet.add(entry.key);
+				}
+				entry = entry.next;
+			}
+		}
+		return keySet;
+	}
+	
+	public Collection<V> values() {
+        if (values==null)
+            values = Collections.synchronizedCollection(getValues());
+        return values;
+    } 
+	
+	private synchronized Collection<V> getValues() {
+		List<V> values = new ArrayList<>();
+		@SuppressWarnings("unchecked")
+		Entry<K,V>[] tab = (Entry<K,V>[])table;
+		for(int i=0; i<tab.length; i++) {
+			Entry<K, V> entry = tab[i];
+			while (entry != null) {
+				if (entry.key != null) {
+					values.add(entry.value);
+				}
+				entry = entry.next;
+			}
+		}
+		return values;
+	}
+	
 	private static class Entry<K, V> {
 		int hash;
 		K key;
@@ -159,6 +256,16 @@ public class HashTable<K, V> {
 		HashTable<String, String> hashTable = new HashTable<>();
 		hashTable.put("name", "张三");
 		hashTable.put("sex", "男");
-		System.out.println(hashTable.get("name") + "-->" + hashTable.get("sex"));
+		hashTable.put("age", "18");
+		hashTable.put("birthday", "9月18日");
+		
+		hashTable.remove("name");
+		
+		Set<String> keySet = hashTable.keySet();
+		System.out.println(keySet);
+		System.out.println(hashTable.values());
+		
+		hashTable.clear();
+		System.out.println("size:" + hashTable.size() + ", values:" + hashTable.values());
 	}
 }

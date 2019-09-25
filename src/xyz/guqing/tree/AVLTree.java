@@ -11,7 +11,6 @@ import org.junit.Assert;
 
 /**
  * 平衡查找树
- * TODO 双旋代码有问题
  * @author guqing
  */
 public class AVLTree<K extends Comparable<K>, V> {

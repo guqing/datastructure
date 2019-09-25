@@ -1,4 +1,19 @@
+<p align="center"><a href="https://algorithm.guqing.xyz/algorithms" target="_blank"><img width="100"src="./docs/assets/logo.png"></a></p>
 <h1 align="center">Java Data Structrue</h1>
+<div align="center">
+  <strong>
+    个人学习笔记及总结希望能给需要的人提供一个参考
+  </strong>
+</div>
+
+<div align="center">
+    <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/guqing/datastructure">
+    <img src="https://img.shields.io/badge/license-MIT-green"	alt="GitHub License">
+    <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/guqing/datastructure">
+    <img alt="GitHub language count" src="https://img.shields.io/github/languages/count/guqing/datastructure">
+    <img alt="CodeFactor Grade" src="https://img.shields.io/codefactor/grade/github/guqing/datastructure/master">
+    <img src="https://img.shields.io/badge/Author-guqing-orange.svg"	alt="Github Author">
+</div>
 
 ## 简介
 
@@ -55,4 +70,4 @@
 
 ## 如何贡献
 
-如果你发现任何有错误的地方或是想更新/翻译本文档，请给我提[issues](https://github.com/guqing/datastructure/issues)或[pr](https://github.com/guqing/datastructure/pulls)
+如果你发现任何有错误的地方或是想更新/翻译本文档，请给我提[issues](https://github.com/guqing/datastructure/issues)或[pull request](https://github.com/guqing/datastructure/pulls)
