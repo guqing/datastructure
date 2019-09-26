@@ -122,9 +122,6 @@ public class AVLTree<K extends Comparable<K>, V> {
 	 * <li>LR型</li>
 	 * <li>RR型</li>
 	 * <li>RL型</li>
-	 * 根据不平衡的节点通往高度最大的子树的叶子节
-	 * 点时所途经的前两个节点(节点H、节点X）的方向
-	 * 判断具体是哪一种范型从而做相应的旋转
 	 */
 	private Node<K,V> putBalance(Node<K,V> parent) {
 		// 这里可以将LL和LR合并为在一个if里面，独立写方便看

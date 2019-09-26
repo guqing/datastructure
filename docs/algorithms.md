@@ -4441,6 +4441,185 @@ public class BSTTest {
 
 为了保证二叉树的平衡在插入节点后如果左子树和右子树的高度差大于 1，则需要对树进行调整，这种操作称之为旋转，旋转操作分为单旋（又分：左旋和右旋）和双旋。
 
+### 四种不平衡范型
+
+在插入的过程中，会出现一下四种情况破坏AVL树的特性，我们可以采取如下相应的旋转。
+
+1、左-左型：做右旋。
+
+2、右-右型：做左旋转。
+
+3、左-右型：先做左旋，后做右旋即称之为双旋。
+
+4、右-左型：先做右旋，再做左旋同样也是双旋。
+
+#### 图解
+
+假如初始时有两个节点构成的一棵树：
+
+![daaaef819261fdaee6](assets/daaaef819261fdaee6.png)
+
+然后我们根据二叉查找树的性质依次插入数值：`1,4,5,6,7,10,9,8`
+
+首先插入 1：
+
+![4afda7f4037142093661eb4d54](assets/4afda7f4037142093661eb4d54.png)
+
+此时这种情况树已经不符合平衡性质，树向左倾斜，最后插入导致树失衡的1号节点**位于左子树的左节点**，就属于**左-左型**，需要**右旋**来调整。
+
+![60dd81383c5d4cdb70e0a675](assets/60dd81383c5d4cdb70e0a675.png)
+
+然后插入4：
+
+![b4454a0f82e3dbd8e2c94](assets/b4454a0f82e3dbd8e2c94.png)
+
+树还没有出现失衡，继续插入5：
+
+![6a6be56774be4089dbb](assets/6a6be56774be4089dbb.png)
+
+此时树不满足平衡性质，树向右倾斜，最后插入导致树失衡的5号节**位于右子树的右节点**，属于**右-右型**，需要**左旋**转调整。
+
+![3a141d73bae7432ddf54cb](assets/3a141d73bae7432ddf54cb.jpeg)
+
+继续插入6：
+
+![ef7e8009f398fd33042](assets/ef7e8009f398fd33042.png)
+
+此时树失衡，新插入的影响平衡的节点6号位于右子树的右节点，属于右-右型，需要进行左旋。
+
+![8045cd3eba70e0ca6af](assets/8045cd3eba70e0ca6af.png)
+
+继续插入7：
+
+![d64d4dc6e86c4b69654d8706](assets/d64d4dc6e86c4b69654d8706.png)
+
+此时树失衡，属于右-右型，需要进行左旋。
+
+![10a259d9451446edea6ed69](assets/10a259d9451446edea6ed69.jpeg)
+
+继续插入10：
+
+![d328a3839d794d8ecf](assets/d328a3839d794d8ecf.png)
+
+树依然处于平衡状态，继续插入9：
+
+![d879c29dca284c08fcc4b6](assets/d879c29dca284c08fcc4b6.png)
+
+可以看到树此时向右倾斜，且新插入的影响了树平衡的9号节点位于右子树的左子树，属于**右-左型**，右-左型仅使用一次左旋或右旋无法完成平衡，处理如下：
+
+1. 先对节点10进行右旋把它变成右-右型
+
+![17a6245a3c57423f2fe966](assets/17a6245a3c57423f2fe966.png)
+
+2. 然后在进行左旋
+
+![602308d0ac7f6f3543](assets/602308d0ac7f6f3543.png)
+
+所以对于这种**右-左型的，我们需要进行一次右旋再左旋**。
+
+那么根据**右-左型**的处理方式，插入9号节点后需要对树先左旋在右旋 即：
+
+![885547d3d7eb8d70](assets/885547d3d7eb8d70.png)
+
+同理，也存在**左-右型**的，例如：
+
+![85e970e05576e002d93133](assets/85e970e05576e002d93133.png)
+
+影响树平衡的8号节点位于左子树的右子树，属于左-右型，对于左-右型的情况和右-左型相反，我们需要对它进行一次左旋，再右旋。
+
+![26ba7015c187341f3b](assets/26ba7015c187341f3b.png)
+
+[参考连接](https://www.sohu.com/a/270452030_478315)
+
+### 创建树的基本结构
+
+```java
+public class AVLTree<K extends Comparable<K>, V> {
+	private Node<K, V> root;
+
+	private static class Node<K, V> {
+		private K key;
+		private V value;
+		private Node<K, V> left;
+		private Node<K, V> right;
+		// 以该节点为根的子树中的节点总数
+		private int count;
+
+		public Node(K key, V value, int count) {
+			this.key = key;
+			this.value = value;
+			this.count = count;
+		}
+	}
+
+	public int size() {
+		return size(root);
+	}
+
+	private int size(Node<K, V> node) {
+		if (node == null) {
+			return 0;
+		}
+		return node.count;
+	}
+    
+    public int height() {
+		Assert.assertTrue(Math.abs(height(root.left) - height(root.right)) < 2);
+		
+		System.out.println("root节点：" + root.key);
+		System.out.println("左子树的高度：" + height(root.left));
+		System.out.println("右子树的高度：" + height(root.right));
+		return height(root);
+	}
+	
+	/**
+	 * 传入一个父节点返回该节点的高度
+	 * @param parent 父节点
+	 * @return 返回以该节点为父节点的子树的高度
+	 */
+	private int height(Node<K,V> parent) {
+		if (parent == null) {
+            return 0;
+        }
+ 
+        int left = height(parent.left);
+        int right = height(parent.right);
+        if (left > right) {
+            return left + 1;
+        } else {
+            return right + 1;
+        }
+	}
+	
+	/**
+	 * 中序遍历
+	 * @return 返回中序遍历的字符串结果
+	 */
+	public String inorder() {
+		Map<K, V> map = new LinkedHashMap<>();
+
+		Stack<Node<K, V>> stack = new Stack<>();
+
+		Node<K, V> current = root;
+		while (current != null || !stack.isEmpty()) {
+			while (current != null) {
+				stack.push(current);
+				current = current.left;
+			}
+			if (!stack.isEmpty()) {
+				current = stack.pop();
+				map.put(current.key, current.value);
+				current = current.right;
+			}
+		}
+		
+		return map.toString();
+	}
+    
+    // get() put() leftRotate() rightRotate() min() max()等见后续
+}
+```
+
 ### 左旋
 
 ![2183091813131](assets/2183091813131.jpg)
@@ -4453,5 +4632,1280 @@ public class BSTTest {
 2. 当插入节点8时树就不再符合平衡查找树的规则，且右子树比左子树高所以需要**左旋**，从而降低右子树的高度。
 3. 由于在 4 的右孩子 6  的右子树7上插入结点 8 ，使 4 的平衡因子由 1 增至 2 而失去平衡。故需进行一次逆时针旋转操作。即将 4 的右孩子 6 向左上旋转代替 4 作为根结点， 4 向左下旋转成为 6 的左子树的根结点。而原来 6 的左子树则变成 4 的右子树。
 
-[参考链接](https://segmentfault.com/a/1190000019101902?utm_medium=referral&utm_source=tuicool)
+```java
+/**
+ * 左旋转
+ * @param parent 父节点
+ * @return 返回修改后的父节点
+ */
+private Node<K,V> leftRotate(Node<K,V> parent) {
+    Node<K,V> temp = parent.right;
+    parent.right = temp.left;
+    temp.left = parent;
+    temp.count = parent.count;
+    parent.count = 1 + size(parent.left) + size(parent.right);
+    return temp;
+}
+```
+
+### 右旋
+
+![right_rotate131313](assets/right_rotate131313.gif)
+
+右旋过程如上图所示：
+
+根据四种不平衡范型的过程图解，代码如下：
+
+```java
+/**
+ * 右旋转
+ * @param parent 传入一个父节点
+ * @return 返回传入的参数节点
+ */
+private Node<K,V> rightRotate(Node<K,V> parent) {
+    Node<K,V> temp = parent.left;
+
+    parent.left = temp.right;
+    temp.right = parent;
+
+    temp.count = parent.count;
+
+    parent.count = 1 + size(parent.left) + size(parent.right);
+    return temp;
+}
+```
+
+### 双旋
+
+左右旋:
+
+![double_rotate_372740913](assets/double_rotate_372740913.gif)
+
+```java
+/**
+ * 左右旋
+ * @param parent
+ * @return
+ */
+private Node<K,V> leftRightRotate(Node<K,V> parent) {
+    Node<K,V> nodeH = null;
+    Node<K,V> nodeX = null;
+    nodeH = parent.left;
+    nodeX = parent.left.right;
+    parent.left = nodeX.right;
+    nodeH.right = nodeX.left;
+    nodeX.left = nodeH;
+    nodeX.right = parent;
+
+    parent.count = size(parent.left) + size(parent.right) + 1;
+    nodeH.count = size(nodeH.left) + size(nodeH.right) + 1;
+    return nodeX;
+}
+	
+```
+
+右左旋：
+
+![right_left_12379](assets/right_left_12379.gif)
+
+```java
+/**
+ * 右左旋
+ * @param parent
+ * @return
+ */
+private Node<K,V> rightLeftRotate(Node<K,V> parent) {
+    Node<K,V> nodeH = null;
+    Node<K,V> nodeX = null;
+    nodeH = parent.right;
+    nodeX = parent.right.left;
+    parent.right = nodeX.left;
+    nodeH.left = nodeX.right;
+    nodeX.left = parent;
+    nodeX.right = nodeH;
+
+    parent.count = size(parent.left) + size(parent.right) + 1;
+    nodeH.count = size(nodeH.left) + size(nodeH.right) + 1;
+    return nodeX;
+}
+```
+
+### 增删查
+
+put方法：
+
+```java
+public void put(K key, V value) {
+    // 查找key，如果查找则更新它的值，否则为它创建一个新节点
+    if (key == null) {
+        throw new NullPointerException();
+    }
+    root = put(root, key, value);
+}
+
+/**
+	 * 如果key存在与以parent为父节点的子树中则更新它的值
+	 * 否则将以key和value为键值创建对应的新节点插入到该子树中
+	 * 
+	 * @param parent
+	 * @param key
+	 * @param value
+	 * @return
+	 */
+private Node<K,V> put(Node<K,V> parent, K key, V value) {
+    if (parent == null) {
+        return new Node<>(key, value, 1);
+    }
+
+    int cmp = key.compareTo(parent.key);
+
+    if (cmp < 0) {
+        parent.left = put(parent.left, key, value);
+    } else if (cmp > 0) {
+        parent.right = put(parent.right, key, value);
+    } else {
+        parent.value = value;
+    }
+
+    // 高度大于1,需要旋转以达平衡
+    if (Math.abs(height(parent.left) - height(parent.right)) > 1) {
+        parent = putBalance(parent);
+    }
+
+    // 在一次又一次的递归中更新以该节点为父节点的子树节点总数,因为put一次新创建节点的祖先节点对应的count都需要+1
+    parent.count = size(parent.left) + size(parent.right) + 1;
+    return parent;
+}
+```
+
+其中`putBalance()`方法如下：
+
+```java
+/**
+ * 维护平衡查找树的平衡:
+ * 任意一次插入所能造成平衡查找树的不平衡因素
+ * 都可以简化为下述四种范型之一:
+ * <li>LL型即左-左型</li>
+ * <li>LR型即左-右型</li>
+ * <li>RR型即右-右型</li>
+ * <li>RL型即右-左型</li>
+ */
+private Node<K,V> putBalance(Node<K,V> parent) {
+    // 这里可以将LL和LR合并为在一个if里面，独立写方便看
+    // LL
+    if (height(parent.left) > height(parent.right) &&
+        height(parent.left.left) > height(parent.left.right)) {
+        // 右旋
+        parent = rightRotate(parent);
+        return parent;
+    }
+
+    // LR
+    if (height(parent.left) > height(parent.right) &&
+        height(parent.left.right) > height(parent.left.left)) {
+        parent = leftRightRotate(parent);
+        return parent;
+    }
+
+    // RR,RR和RL也可以合并在一个一个if里面独立写方便看
+    if (height(parent.right) > height(parent.left) &&
+        height(parent.right.right) > height(parent.right.left)) {
+        // 左旋
+        parent = leftRotate(parent);
+        return parent;
+    }
+
+    // RL
+    if (height(parent.right) > height(parent.left) &&
+        height(parent.right.left) > height(parent.right.right)) {
+        // 右左旋
+        parent = rightLeftRotate(parent);
+        return parent;
+    }
+    return parent;
+}
+```
+
+get方法：
+
+```java
+public V get(K key) {
+    return get(root, key);
+}
+
+/**
+ * 在以parent为根节点的子树中查找并返回key所对应的值
+ * 
+ * @param parent
+ *            父节点
+ * @param key
+ *            查找的key
+ * @return 找到返回value,否则返回null
+ */
+private V get(Node<K, V> parent, K key) {
+    if (parent == null) {
+        return null;
+    }
+    int cmp = key.compareTo(parent.key);
+    if (cmp < 0) {
+        // 查找左子树
+        return get(parent.left, key);
+    } else if (cmp > 0) {
+        // 查找右子树
+        return get(parent.right, key);
+    } else {
+        return parent.value;
+    }
+}
+```
+
+delete方法：
+
+```java
+/**
+ * 根据key删除
+ * @param key
+ */
+public void delete(K key) {
+    if (key == null) {
+        throw new NullPointerException();
+    }
+    root = delete(root, key);
+}
+
+private Node<K,V> delete(Node<K,V> node, K key) {
+    if (node == null) {
+        return null;
+    }
+
+    int cmp = key.compareTo(node.key);
+    if (cmp < 0) {
+        node.left = delete(node.left, key);
+    } else if (cmp > 0) {
+        node.right = delete(node.right, key);
+    } else {
+        // 这里就是删除对应的三种情况
+        if (node.right == null) {
+            return node.left;
+        }
+
+        if (node.left == null) {
+            return node.right;
+        }
+
+        Node<K, V> temp = node;
+        // 找到最小节点并删除最小节点
+        node = min(temp.right);
+        node.right = deleteMin(temp.right);
+
+        node.left = temp.left;
+    }
+
+    if (Math.abs(height(node.left) - height(node.right)) > 1) {
+        node = deleteBalance(node);
+    }
+    node.count = 1 + size(node.left) + size(node.right);
+    return node;
+}
+```
+删除需要的平衡方法：
+
+```java
+private Node<K,V> deleteBalance(Node<K,V> node) {
+    // LL & L
+    if (height(node.left) > height(node.right) &&
+        height(node.left.left) >= height(node.left.right)) {
+        // 右旋
+        node = rightRotate(node);
+        return node;
+    }
+    // LR
+    if (height(node.left) > height(node.right) &&
+        height(node.left.right) > height(node.left.left)) {
+        // 左右旋
+        node = leftRightRotate(node);
+        return node;
+    }
+    // RR & R
+    if (height(node.right) > height(node.left) &&
+        height(node.right.right) >= height(node.right.left)) {
+        // 左旋
+        node = leftRotate(node);
+        return node;
+    }
+    // RL
+    if (height(node.right) > height(node.left) &&
+        height(node.right.left) > height(node.right.right)) {
+        // 右左旋
+        node = rightLeftRotate(node);
+        return node;
+    }
+    return node;
+}
+```
+
+delete中需要的其他一些方法：
+
+```java
+public K min() {
+    return min(root).key;
+}
+
+/**
+ * 获取最小键,如果根节点的左链接为空，那么一棵二叉查找树
+ * 中最小的键就是根节点，如果左链接非空，那么树中最小键
+ * 就是左子树中的最小键
+ * 
+ * @return
+ */
+private Node<K, V> min(Node<K, V> parent) {
+    if (parent.left == null) {
+        return parent;
+    }
+    return min(parent.left);
+}
+
+public K max() {
+    return max(root).key;
+}
+
+/**
+ * 只是在min()的基础上将left和right调换 并将> 和 < 调换即可
+ * 
+ * @return 返回最大节点
+ */
+private Node<K, V> max(Node<K, V> parent) {
+    if (parent.right == null) {
+        return parent;
+    }
+    return max(parent.right);
+}
+
+/**
+ * 删除最小键
+ */
+public void deleteMin() {
+    root = deleteMin(root);
+}
+
+private Node<K, V> deleteMin(Node<K, V> parent) {
+    if (parent.left == null) {
+        return parent.right;
+    }
+    parent.left = deleteMin(parent.left);
+    // 同样的删除也需要逐一更新节点的count
+    parent.count = size(parent.left) + size(parent.right) + 1;
+    return parent;
+}
+
+/**
+ * 删除最大键
+ */
+public void deleteMax() {
+    root = deleteMax(root);
+}
+
+/**
+ * 与deleteMin类似只需要将left和right互换即可
+ * 
+ * @param parent
+ * @return
+ */
+private Node<K, V> deleteMax(Node<K, V> parent) {
+    if (parent.right == null) {
+        return parent.left;
+    }
+    parent.right = deleteMax(parent.right);
+    // 同样的删除也需要逐一更新节点的count
+    parent.count = size(parent.left) + size(parent.right) + 1;
+    return parent;
+}
+```
+
+keys()方法：
+
+```java
+/**
+ * @return 返回所有的key
+ */
+public Iterable<K> keys() {
+    return keys(min(), max());
+}
+
+/**
+ * 范围查找
+ * 
+ * @param low
+ * @param high
+ * @return
+ */
+public Iterable<K> keys(K low, K high) {
+    List<K> list = new ArrayList<>();
+    keys(root, list, low, high);
+    return list;
+}
+
+private void keys(Node<K, V> parent, List<K> list, K low, K high) {
+    if (parent == null) {
+        return;
+    }
+
+    int cmpLow = low.compareTo(parent.key);
+    int cmpHigh = high.compareTo(parent.key);
+
+    if (cmpLow < 0) {
+        keys(parent.left, list, low, high);
+    }
+
+    if (cmpLow <= 0 && cmpHigh >= 0) {
+        list.add(parent.key);
+    }
+
+    if (cmpHigh > 0) {
+        keys(parent.right, list, low, high);
+    }
+}
+```
+
+测试用例见项目
+
+## 红黑树
+
+Red-Black Tree，又称为“红黑树”，它一种特殊的二叉查找树。红黑树的每个节点上都有存储位表示节点的颜色，可以是红(Red)或黑(Black)。
+
+**红黑树的特性**:
+（1）每个节点或者是黑色，或者是红色。
+（2）根节点是黑色。
+（3）每个叶子节点（NIL）是黑色。 [注意：这里叶子节点，是指为空(NIL或NULL)的叶子节点！]
+（4）如果一个节点是红色的，则它的子节点必须是黑色的。
+（5）从一个节点到该节点的子孙节点的所有路径上包含相同数目的黑节点。
+
+**注意**：
+(1) 如上特性(3)中的叶子节点，是只为空(NIL或null)的节点。
+(2) 特性(5)，确保没有一条路径会比其他路径长出俩倍。因而，红黑树是相对是接近平衡的二叉树。
+
+![251730074203156](assets/251730074203156.jpg)
+
+红黑树并不是一棵*完美*平衡二叉查找树，它有自己的行为准则，红黑树左子树和右子树的黑结点的层数是相等的，也即任意一个结点到到每个叶子结点的路径都包含数量相同的黑结点(性质5)。所以我们叫红黑树这种平衡为**黑色完美平衡**。
+
+红黑树一些结点的叫法如下图所示;
+
+![5klzr4xgv8](assets/5klzr4xgv8.jpeg)
+
+我们把正在处理(遍历)的结点叫做当前结点，如图2中的D，它的父亲叫做父结点，它的父亲的另外一个子结点叫做兄弟结点，父亲的父亲叫做祖父结点。
+
+前面讲到红黑树能自平衡，有三种操作：左旋、右旋和变色。
+
+- **左旋**：以某个结点作为支点(旋转结点)，其右子结点变为旋转结点的父结点，右子结点的左子结点变为旋转结点的右子结点，左子结点保持不变。与平衡查找树左旋相似因为红黑树需要控制颜色。
+- **右旋**：以某个结点作为支点(旋转结点)，其左子结点变为旋转结点的父结点，左子结点的右子结点变为旋转结点的左子结点，右子结点保持不变。
+- **变色**：结点的颜色由红变黑或由黑变红。
+
+### 红黑树操作图解
+
+#### 红黑树查找
+
+因为红黑树是一颗二叉平衡树，并且查找不会破坏树的平衡，所以查找跟二叉平衡树的查找无异：
+
+1. 从根结点开始查找，把根结点设置为当前结点；
+2. 若当前结点为空，返回null；
+3. 若当前结点不为空，用当前结点的key跟查找key作比较；
+4. 若当前结点key等于查找key，那么该key就是查找目标，返回当前结点；
+5. 若当前结点key大于查找key，把当前结点的左子结点设置为当前结点，重复步骤2；
+6. 若当前结点key小于查找key，把当前结点的右子结点设置为当前结点，重复步骤2；
+
+如下图所示：
+
+![hsl2t3a6rl](assets/hsl2t3a6rl.jpeg)
+
+由于红黑树总保持黑色完美平衡，所以它的查找最坏时间复杂度为O(2lgN)，也即整颗树刚好红黑相隔的时候。
+
+#### 红黑树插入
+
+插入操作包括两部分工作：一查找插入的位置；二插入后自平衡。查找插入的父结点很简单，跟查找操作区别不大：
+
+1. 从根结点开始查找；
+2. 若根结点为空，那么插入结点作为根结点，结束。
+3. 若根结点不为空，那么把根结点作为当前结点；
+4. 若当前结点为null，返回当前结点的父结点，结束。
+5. 若当前结点key等于查找key，那么该key所在结点就是插入结点，更新结点的值，结束。
+6. 若当前结点key大于查找key，把当前结点的左子结点设置为当前结点，重复步骤4；
+7. 若当前结点key小于查找key，把当前结点的右子结点设置为当前结点，重复步骤4；
+
+如下图所示：
+
+![i2qmdjrhy5](assets/i2qmdjrhy5.jpeg)
+
+找到插入位置后，把插入结点放到正确的位置并且新插入的节点颜色时**红色**。理由很简单，红色在父结点（如果存在）为黑色结点时，红黑树的黑色平衡没被破坏，不需要做自平衡操作。但如果插入结点是黑色，那么插入位置所在的子树黑色结点总是多1，必须做自平衡。
+
+所有插入情景如下图所示：
+
+![b98wuyfpii](assets/b98wuyfpii.jpeg)
+
+在开始每个情景的讲解前，我们还是先来约定下，如下图所示：
+
+![wsqois4eke](assets/wsqois4eke.jpeg)
+
+图8的字母并不代表结点Key的大小。I表示插入结点，P表示插入结点的父结点，S表示插入结点的叔叔结点，PP表示插入结点的祖父结点。
+
+好了，下面让我们一个一个来分析每个插入的情景以其处理。
+
+##### 插入情景1：红黑树为空树
+
+最简单的一种情景，直接把插入结点作为根结点就行，但注意，根据红黑树性质2：根节点是黑色。还需要把插入结点设为黑色。
+
+> **处理**：把插入结点作为根结点，并把结点设置为黑色。
+
+##### 插入情景2：插入结点的Key已存在
+
+插入结点的Key已存在，既然红黑树总保持平衡，在插入前红黑树已经是平衡的，那么把插入结点设置为将要替代结点的颜色，再把结点的值更新就完成插入。
+
+> **处理**：
+>
+> - 把I设为当前结点的颜色
+> - 更新当前结点的值为插入结点的值
+
+##### 插入情景3：插入结点的父结点为黑结点
+
+由于插入的结点是红色的，当插入结点的黑色时，并不会影响红黑树的平衡，直接插入即可，无需做自平衡。
+
+> **处理：**直接插入
+
+##### 插入情景4：插入结点的父结点为红结点
+
+再次回想下红黑树的性质2：根结点是黑色。**如果插入的父结点为红结点，那么该父结点不可能为根结点，所以插入结点总是存在祖父结点**。这点很重要，因为后续的旋转操作肯定需要祖父结点的参与。
+
+情景4又分为很多子情景，下面将进入重点部分:
+
+
+
+> **插入情景4.1：叔叔结点存在并且为红结点**
+
+从红黑树性质4可以，祖父结点肯定为黑结点，因为不可以同时存在两个相连的红结点。那么此时该插入子树的红黑层数的情况是：黑红红。显然最简单的处理方式是把其改为：红黑红。如下所示。
+
+处理：
+
+- 将P和S设置为黑色
+- 将PP设置为红色
+- 把PP设置为当前插入结点
+
+![b465tfffg3](assets/b465tfffg3.jpeg)
+
+![fowxwzean0](assets/fowxwzean0.jpeg)
+
+可以看到，我们把PP结点设为红色了，如果PP的父结点是黑色，那么无需再做任何处理；但如果PP的父结点是红色，根据性质4，此时红黑树已不平衡了，所以还需要把PP当作新的插入结点，继续做插入操作自平衡处理，直到平衡为止。
+
+试想下PP刚好为根结点时，那么根据性质2，我们必须把PP重新设为黑色，那么树的红黑结构变为：黑黑红。换句话说，从根结点到叶子结点的路径中，黑色结点增加了。**这也是唯一一种会增加红黑树黑色结点层数的插入情景**。
+
+我们还可以总结出另外一个经验：**红黑树的生长是自底向上的**。这点不同于普通的二叉查找树，普通的二叉查找树的生长是自顶向下的。
+
+> **插入情景4.2：叔叔结点不存在或为黑结点，并且插入结点的父亲结点是祖父结点的左子结点**
+
+单纯从插入前来看，也即不算情景4.1自底向上处理时的情况，叔叔结点非红即为叶子结点(Nil)。因为如果叔叔结点为黑结点，而父结点为红结点，那么叔叔结点所在的子树的黑色结点就比父结点所在子树的多了，这不满足红黑树的性质5。后续情景同样如此，不再多做说明了。
+
+前文说了，需要旋转操作时，肯定一边子树的结点多了或少了，需要租或借给另一边。插入显然是多的情况，那么把多的结点租给另一边子树就可以了。
+
+>  **插入情景4.2.1：插入结点是其父结点的左子结点**
+
+ **处理：**
+
+- 将P设为黑色
+- 将PP设为红色
+- 对PP进行右旋
+
+![3sc9yv4fjg](assets/3sc9yv4fjg.jpeg)
+
+由上图可得，左边两个红结点，右边不存在，那么一边一个刚刚好，并且因为为红色，肯定不会破坏树的平衡。
+
+咦，可以把PP设为红色，I和P设为黑色吗？答案是可以！看过《算法：第4版》的同学可能知道，书中讲解的就是把PP设为红色，I和P设为黑色。但把PP设为红色，显然又会出现情景4.1的情况，需要自底向上处理。
+
+> **插入情景4.2.2：插入结点是其父结点的右子结点**
+
+这种情景显然可以转换为情景4.2.1，如下图所示，不做过多说明了。
+
+处理：
+
+- 对P进行左旋
+- 把P设置为插入结点，得到情景4.2.1
+- 进行情景4.2.1的处理
+
+![9kznwh0zl3](assets/9kznwh0zl3.jpeg)
+
+> **插入情景4.3：叔叔结点不存在或为黑结点，并且插入结点的父亲结点是祖父结点的右子结点**
+
+该情景对应情景4.2，只是方向反转，不做过多说明了，直接看图。
+
+> **插入情景4.3.1：插入结点是其父结点的右子结点** 
+
+**处理：**
+
+- 将P设为黑色
+- 将PP设为红色
+- 对PP进行左旋
+
+> **插入情景4.3.2：插入结点是其父结点的右子结点**
+
+**处理：**
+
+- 对P进行右旋
+- 把P设置为插入结点，得到情景4.3.1
+- 进行情景4.3.1的处理
+
+![klam057cu1](assets/klam057cu1.jpeg)
+
+好了，讲完插入的所有情景了。可能又同学会想：上面的情景举例的都是第一次插入而不包含自底向上处理的情况，那么上面所说的情景都适合自底向上的情况吗？答案是肯定的。理由很简单，但每棵子树都能自平衡，那么整棵树最终总是平衡的。好吧，在出个习题，请大家拿出笔和纸画下试试（请务必动手画下，加深印象）：
+
+#### 红黑树删除
+
+红黑树插入已经够复杂了，但删除更复杂，也是红黑树最复杂的操作了。但稳住，胜利的曙光就在前面了！
+
+红黑树的删除操作也包括两部分工作：一查找目标结点；而删除后自平衡。查找目标结点显然可以复用查找操作，当不存在目标结点时，忽略本次操作；当存在目标结点时，删除后就得做自平衡处理了。删除了结点后我们还需要找结点来替代删除结点的位置，不然子树跟父辈结点断开了，除非删除结点刚好没子结点，那么就不需要替代。
+
+二叉树删除结点找替代结点有3种情情景：
+
+- 情景1：若删除结点无子结点，直接删除
+- 情景2：若删除结点只有一个子结点，用子结点替换删除结点
+- 情景3：若删除结点有两个子结点，用后继结点（大于删除结点的最小结点）替换删除结点
+
+补充说明下，情景3的后继结点是大于删除结点的最小结点，也是删除结点的右子树种最右结点。那么可以拿前继结点（删除结点的左子树最左结点）替代吗？可以的。但习惯上大多都是拿后继结点来替代，后文的讲解也是用后继结点来替代。另外告诉大家一种找前继和后继结点的直观的方法（不知为何没人提过，大家都知道？）：**把二叉树所有结点投射在X轴上，所有结点都是从左到右排好序的，所有目标结点的前后结点就是对应前继和后继结点**。如下图所示。
+
+![zwy37abbrw](assets/zwy37abbrw.jpeg)
+
+接下来，讲一个重要的思路：**删除结点被替代后，在不考虑结点的键值的情况下，对于树来说，可以认为删除的是替代结点！**话很苍白，我们看下图。在不看键值对的情况下，图中红黑树最终结果是删除了Q所在位置的结点！这种思路非常重要，大大简化了后文讲解红黑树删除的情景！
+
+![bsbpol9hzx](assets/bsbpol9hzx.jpeg)
+
+基于此，上面所说的3种二叉树的删除情景可以相互转换并且最终都是转换为情景1！
+
+- 情景2：删除结点用其唯一的子结点替换，子结点替换为删除结点后，可以认为删除的是子结点，若子结点又有两个子结点，那么相当于转换为情景3，一直自顶向下转换，总是能转换为情景1。（对于红黑树来说，根据性质5.1，只存在一个子结点的结点肯定在树末了）
+- 情景3：删除结点用后继结点（肯定不存在左结点），如果后继结点有右子结点，那么相当于转换为情景2，否则转为为情景1。
+
+二叉树删除结点情景关系图如下图所示：
+
+![plg763eg42](assets/plg763eg42.png)
+
+综上所述，**删除操作删除的结点可以看作删除替代结点，而替代结点最后总是在树末。**有了这结论，我们讨论的删除红黑树的情景就少了很多，因为我们只考虑删除树末结点的情景了。
+
+同样的，我们也是先来总体看下删除操作的所有情景，如下图所示。
+
+![372p26y12o](assets/372p26y12o.jpeg)
+
+即使简化了还是有9种情景！但跟插入操作一样，存在左右对称的情景，只是方向变了，没有本质区别。同样的，我们还是来约定下，如图所示：
+
+![wcrztmlzai](assets/wcrztmlzai.jpeg)
+
+图中的字母并不代表结点Key的大小。R表示替代结点，P表示替代结点的父结点，S表示替代结点的兄弟结点，SL表示兄弟结点的左子结点，SR表示兄弟结点的右子结点。灰色结点表示它可以是红色也可以是黑色。
+
+值得特别提醒的是，**R是即将被替换到删除结点的位置的替代结点，在删除前，它还在原来所在位置参与树的子平衡，平衡后再替换到删除结点的位置，才算删除完成。**
+
+万事具备，我们进入最后的也是最难的讲解。
+
+> ##### 删除情景1：替换结点是红色结点
+
+我们把替换结点换到了删除结点的位置时，由于替换结点时红色，删除也了不会影响红黑树的平衡，只要把替换结点的颜色设为删除的结点的颜色即可重新平衡。
+
+**处理：**颜色变为删除结点的颜色
+
+> ##### 删除情景2：替换结点是黑结点
+
+当替换结点是黑色时，我们就不得不进行自平衡处理了。我们必须还得考虑替换结点是其父结点的左子结点还是右子结点，来做不同的旋转操作，使树重新平衡。
+
+> **删除情景2.1：替换结点是其父结点的左子结点**
+
+> **删除情景2.1.1：替换结点的兄弟结点是红结点**
+
+若兄弟结点是红结点，那么根据性质4，兄弟结点的父结点和子结点肯定为黑色，不会有其他子情景，我们按图21处理，得到删除情景2.1.2.3（后续讲解，这里先记住，此时R仍然是替代结点，它的新的兄弟结点SL和兄弟结点的子结点都是黑色）。
+
+**处理：**
+
+- 将S设为黑色
+- 将P设为红色
+- 对P进行左旋，得到情景2.1.2.3
+- 进行情景2.1.2.3的处理
+
+![1oslwf8jey](assets/1oslwf8jey.jpeg)
+
+> **删除情景2.1.2：替换结点的兄弟结点是黑结点**
+
+当兄弟结点为黑时，其父结点和子结点的具体颜色也无法确定（如果也不考虑自底向上的情况，子结点非红即为叶子结点Nil，Nil结点为黑结点），此时又得考虑多种子情景。
+
+> **删除情景2.1.2.1：替换结点的兄弟结点的右子结点是红结点，左子结点任意颜色**
+
+即将删除的左子树的一个黑色结点，显然左子树的黑色结点少1了，然而右子树又又红色结点，那么我们直接向右子树“借”个红结点来补充黑结点就好啦，此时肯定需要用旋转处理了。如图22所示。
+
+**处理：**
+
+- 将S的颜色设为P的颜色
+- 将P设为黑色
+- 将SR设为黑色
+- 对P进行左旋
+
+![av4y38axjh](assets/av4y38axjh.jpeg)
+
+平衡后的图怎么不满足红黑树的性质？前文提醒过，R是即将替换的，它还参与树的自平衡，平衡后再替换到删除结点的位置，所以R最终可以看作是删除的。另外图2.1.2.1是考虑到第一次替换和自底向上处理的情况，如果只考虑第一次替换的情况，根据红黑树性质，SL肯定是红色或为Nil，所以最终结果树是平衡的。如果是自底向上处理的情况，同样，每棵子树都保持平衡状态，最终整棵树肯定是平衡的。后续的情景同理，不做过多说明了。
+
+> **删除情景2.1.2.2：替换结点的兄弟结点的右子结点为黑结点，左子结点为红结点**
+
+兄弟结点所在的子树有红结点，我们总是可以向兄弟子树借个红结点过来，显然该情景可以转换为情景2.1.2.1。图如下所示：
+
+**处理：**
+
+- 将S设为红色
+- 将SL设为黑色
+- 对S进行右旋，得到情景2.1.2.1
+- 进行情景2.1.2.1的处理
+
+> **删除情景2.1.2.3：替换结点的兄弟结点的子结点都为黑结点**
+
+好了，此次兄弟子树都没红结点“借”了，兄弟帮忙不了，找父母呗，这种情景我们把兄弟结点设为红色，再把父结点当作替代结点，自底向上处理，去找父结点的兄弟结点去“借”。但为什么需要把兄弟结点设为红色呢？显然是为了在P所在的子树中保证平衡（R即将删除，少了一个黑色结点，子树也需要少一个），后续的平衡工作交给父辈们考虑了，还是那句，当每棵子树都保持平衡时，最终整棵总是平衡的。
+
+**处理：**
+
+- 将S设为红色
+- 把P作为新的替换结点
+- 重新进行删除结点情景处理
+
+![9lho28rnpx](assets/9lho28rnpx.jpeg)
+
+> **删除情景2.2：替换结点是其父结点的右子结点**
+
+好啦，右边的操作也是方向相反，不做过多说明了，相信理解了删除情景2.1后，肯定可以理解2.2。
+
+> **删除情景2.2.1：替换结点的兄弟结点是红结点**
+
+**处理：**
+
+- 将S设为黑色
+- 将P设为红色
+- 对P进行右旋，得到情景2.2.2.3
+- 进行情景2.2.2.3的处理
+
+![wf32vmh0uy](assets/wf32vmh0uy.jpeg)
+
+> **删除情景2.2.2：替换结点的兄弟结点是黑结点**
+
+> **删除情景2.2.2.1：替换结点的兄弟结点的左子结点是红结点，右子结点任意颜色**
+
+**处理：**
+
+- 将S的颜色设为P的颜色
+- 将P设为黑色
+- 将SL设为黑色
+- 对P进行右旋
+
+![6okc2dq0mq](assets/6okc2dq0mq.jpeg)
+
+> **删除情景2.2.2.2：替换结点的兄弟结点的左子结点为黑结点，右子结点为红结点**
+
+**处理：**
+
+- 将S设为红色
+- 将SR设为黑色
+- 对S进行左旋，得到情景2.2.2.1
+- 进行情景2.2.2.1的处理
+
+![su8760oy4j](assets/su8760oy4j.jpeg)
+
+> **删除情景2.2.2.3：替换结点的兄弟结点的子结点都为黑结点**
+
+**处理：**
+
+- 将S设为红色
+- 把P作为新的替换结点
+- 重新进行删除结点情景处理
+
+![paok423nu3](assets/paok423nu3.jpeg)
+
+综上，红黑树删除后自平衡的处理可以总结为：
+
+1. 自己能搞定的自消化（情景1）
+2. 自己不能搞定的叫兄弟帮忙（除了情景1、情景2.1.2.3和情景2.2.2.3）
+3. 兄弟都帮忙不了的，通过父母，找远方亲戚（情景2.1.2.3和情景2.2.2.3）
+
+哈哈，是不是跟现实中很像，当我们有困难时，首先先自己解决，自己无力了总兄弟姐妹帮忙，如果连兄弟姐妹都帮不上，再去找远方的亲戚了。
+
+[引用连接](https://cloud.tencent.com/developer/article/1450976)
+
+### 红黑树代码实现
+
+基本结构：
+
+```java
+/**
+ * 红黑树
+ * 
+ * @author guqin
+ * @param <K>
+ *            key
+ * @param <V>
+ *            value
+ */
+public class RedBlackBST<K extends Comparable<K>, V> {
+	private Node<K, V> root;
+	private static final boolean RED = true;
+	private static final boolean BLACK = false;
+
+	private static class Node<K, V> {
+		K key;
+		V value;
+		Node<K, V> left;
+		Node<K, V> right;
+		// 这棵树中的节点总数
+		int count;
+		// 由其父节点指向它的链接的颜色
+		boolean color;
+
+		public Node(K key, V value, int count, boolean color) {
+			super();
+			this.key = key;
+			this.value = value;
+			this.count = count;
+			this.color = color;
+		}
+	}
+
+	private boolean isRed(Node<K, V> node) {
+		if (node == null) {
+			return false;
+		}
+		return node.color == RED;
+	}
+
+	public int size() {
+		return size(root);
+	}
+
+	private int size(Node<K, V> node) {
+		if (node == null) {
+			return 0;
+		}
+		return node.count;
+	}
+    
+    public boolean contains(K key) {
+		return get(key) != null;
+	}
+
+	public boolean isEmpty() {
+		return root == null;
+	}
+    
+    public String inorder() {
+		Map<K, V> map = new LinkedHashMap<>();
+
+		Stack<Node<K, V>> stack = new Stack<>();
+
+		Node<K, V> current = root;
+		while (current != null || !stack.isEmpty()) {
+			while (current != null) {
+				stack.push(current);
+				current = current.left;
+			}
+			if (!stack.isEmpty()) {
+				current = stack.pop();
+				map.put(current.key, current.value);
+				current = current.right;
+			}
+		}
+
+		return map.toString();
+	}
+
+	public int height() {
+		System.out.println("root节点：" + root.key);
+		System.out.println("左子树的高度：" + height(root.left));
+		System.out.println("右子树的高度：" + height(root.right));
+		return height(root);
+	}
+
+	/**
+	 * 传入一个父节点返回该节点的高度
+	 * 
+	 * @param parent
+	 *            父节点
+	 * @return 返回以该节点为父节点的子树的高度
+	 */
+	private int height(Node<K, V> parent) {
+		if (parent == null) {
+			return 0;
+		}
+
+		int left = height(parent.left);
+		int right = height(parent.right);
+		if (left > right) {
+			return left + 1;
+		} else {
+			return right + 1;
+		}
+	}
+}
+```
+
+左旋：
+
+```java
+private Node<K, V> rotateLeft(Node<K, V> h) {
+    Node<K, V> x = h.right;
+    h.right = x.left;
+    x.left = h;
+
+    x.color = h.color;
+    h.color = RED;
+    x.count = h.count;
+    h.count = 1 + size(h.left) + size(h.right);
+    return x;
+}
+```
+
+右旋
+
+```java
+private Node<K, V> rotateRight(Node<K, V> h) {
+    Node<K, V> x = h.left;
+    h.left = x.right;
+    x.right = h;
+
+    x.color = h.color;
+    h.color = RED;
+    x.count = h.count;
+    h.count = 1 + size(h.left) + size(h.right);
+    return x;
+}
+```
+
+颜色变换：
+
+```java
+private void flipColors(Node<K, V> h) {
+    // h must have opposite color of its two children
+    // assert (h != null) && (h.left != null) && (h.right != null);
+    // assert (!isRed(h) && isRed(h.left) && isRed(h.right))
+    // || (isRed(h) && !isRed(h.left) && !isRed(h.right));
+    h.color = !h.color;
+    h.left.color = !h.left.color;
+    h.right.color = !h.right.color;
+}
+```
+
+### 插入方法
+
+```java
+public void put(K key, V val) {
+    if (key == null)
+        throw new IllegalArgumentException("first argument to put() is null");
+    if (val == null) {
+        delete(key);
+        return;
+    }
+
+    root = put(root, key, val);
+    root.color = BLACK;
+    // assert check();
+}
+
+// insert the key-value pair in the subtree rooted at h
+private Node<K, V> put(Node<K, V> h, K key, V val) {
+    if (h == null) {
+        return new Node<K, V>(key, val, 1, RED);
+    }
+
+    int cmp = key.compareTo(h.key);
+    if (cmp < 0) {
+        h.left = put(h.left, key, val);
+    } else if (cmp > 0) {
+        h.right = put(h.right, key, val);
+    } else {
+        h.value = val;
+    }
+
+    // fix-up any right-leaning links
+    if (isRed(h.right) && !isRed(h.left)) {
+        h = rotateLeft(h);
+    }
+    if (isRed(h.left) && isRed(h.left.left)) {
+        h = rotateRight(h);
+    }
+    if (isRed(h.left) && isRed(h.right)) {
+        flipColors(h);
+    }
+
+    h.count = size(h.left) + size(h.right) + 1;
+
+    return h;
+}
+```
+
+### 查找方法
+
+```java
+public V get(K key) {
+    return get(root, key);
+}
+
+/**
+ * 在以parent为根节点的子树中查找并返回key所对应的值
+ * 
+ * @param parent
+ *            父节点
+ * @param key
+ *            查找的key
+ * @return 找到返回value,否则返回null
+ */
+private V get(Node<K, V> parent, K key) {
+    if (parent == null) {
+        return null;
+    }
+    int cmp = key.compareTo(parent.key);
+    if (cmp < 0) {
+        // 查找左子树
+        return get(parent.left, key);
+    } else if (cmp > 0) {
+        // 查找右子树
+        return get(parent.right, key);
+    } else {
+        return parent.value;
+    }
+}
+```
+
+### 删除
+
+```java
+public void delete(K key) {
+    if (key == null) {
+        throw new IllegalArgumentException("argument to delete() is null");
+    }
+
+    if (!contains(key)) {
+        return;
+    }
+
+    // if both children of root are black, set root to red
+    if (!isRed(root.left) && !isRed(root.right)) {
+        root.color = RED;
+    }
+
+    root = delete(root, key);
+
+    if (!isEmpty()) {
+        root.color = BLACK;
+    }
+    // assert check();
+}
+
+// delete the key-value pair with the given key rooted at h
+private Node<K, V> delete(Node<K, V> h, K key) {
+    // assert get(h, key) != null;
+
+    if (key.compareTo(h.key) < 0) {
+        if (!isRed(h.left) && !isRed(h.left.left))
+            h = moveRedLeft(h);
+        h.left = delete(h.left, key);
+    } else {
+        if (isRed(h.left))
+            h = rotateRight(h);
+        if (key.compareTo(h.key) == 0 && (h.right == null))
+            return null;
+        if (!isRed(h.right) && !isRed(h.right.left))
+            h = moveRedRight(h);
+        if (key.compareTo(h.key) == 0) {
+            Node<K, V> x = min(h.right);
+            h.key = x.key;
+            h.value = x.value;
+            // h.val = get(h.right, min(h.right).key);
+            // h.key = min(h.right).key;
+            h.right = deleteMin(h.right);
+        } else
+            h.right = delete(h.right, key);
+    }
+    return balance(h);
+}
+```
+
+删除方法中用到的其他方法
+
+```java
+public K min() {
+    return min(root).key;
+}
+
+/**
+	 * 获取最小键,如果根节点的左链接为空，那么一棵二叉查找树 中最小的键就是根节点，如果左链接非空，那么树中最小键 就是左子树中的最小键
+	 * 
+	 * @return
+	 */
+private Node<K, V> min(Node<K, V> parent) {
+    if (parent.left == null) {
+        return parent;
+    }
+    return min(parent.left);
+}
+
+public K max() {
+    return max(root).key;
+}
+
+/**
+	 * 只是在min()的基础上将left和right调换 并将> 和 < 调换即可
+	 * 
+	 * @return 返回最大节点
+	 */
+private Node<K, V> max(Node<K, V> parent) {
+    if (parent.right == null) {
+        return parent;
+    }
+    return max(parent.right);
+}
+/**
+ * 删除最小键
+ */
+public void deleteMin() {
+    if (isEmpty()) {
+        throw new NoSuchElementException("BST underflow");
+    }
+
+    // if both children of root are black, set root to red
+    if (!isRed(root.left) && !isRed(root.right))
+        root.color = RED;
+
+    root = deleteMin(root);
+    if (!isEmpty())
+        root.color = BLACK;
+    // assert check();
+}
+
+// delete the key-value pair with the minimum key rooted at h
+private Node<K, V> deleteMin(Node<K, V> h) {
+    if (h.left == null)
+        return null;
+
+    if (!isRed(h.left) && !isRed(h.left.left))
+        h = moveRedLeft(h);
+
+    h.left = deleteMin(h.left);
+    return balance(h);
+}
+
+/**
+ * 删除最大键
+ */
+public void deleteMax() {
+    if (isEmpty()) {
+        throw new NoSuchElementException("BST underflow");
+    }
+
+    // if both children of root are black, set root to red
+    if (!isRed(root.left) && !isRed(root.right))
+        root.color = RED;
+
+    root = deleteMax(root);
+    if (!isEmpty())
+        root.color = BLACK;
+    // assert check();
+}
+
+// delete the key-value pair with the maximum key rooted at h
+private Node<K, V> deleteMax(Node<K, V> h) {
+    if (isRed(h.left))
+        h = rotateRight(h);
+
+    if (h.right == null)
+        return null;
+
+    if (!isRed(h.right) && !isRed(h.right.left))
+        h = moveRedRight(h);
+
+    h.right = deleteMax(h.right);
+
+    return balance(h);
+}
+
+private Node<K, V> balance(Node<K, V> h) {
+    // assert (h != null);
+    if (isRed(h.right)) {
+        h = rotateLeft(h);
+    }
+    if (isRed(h.left) && isRed(h.left.left)) {
+        h = rotateRight(h);
+    }
+    if (isRed(h.left) && isRed(h.right)) {
+        flipColors(h);
+    }
+
+    h.count = size(h.left) + size(h.right) + 1;
+    return h;
+}
+
+// Assuming that h is red and both h.left and h.left.left
+// are black, make h.left or one of its children red.
+private Node<K, V> moveRedLeft(Node<K, V> h) {
+    // assert (h != null);
+    // assert isRed(h) && !isRed(h.left) && !isRed(h.left.left);
+
+    flipColors(h);
+    if (isRed(h.right.left)) {
+        h.right = rotateRight(h.right);
+        h = rotateLeft(h);
+        flipColors(h);
+    }
+    return h;
+}
+
+// Assuming that h is red and both h.right and h.right.left
+// are black, make h.right or one of its children red.
+private Node<K, V> moveRedRight(Node<K, V> h) {
+    // assert (h != null);
+    // assert isRed(h) && !isRed(h.right) && !isRed(h.right.left);
+    flipColors(h);
+    if (isRed(h.left.left)) {
+        h = rotateRight(h);
+        flipColors(h);
+    }
+    return h;
+}
+```
+
+### 范围查询
+
+```java
+/**
+ * @return 返回所有的key
+ */
+public Iterable<K> keys() {
+    return keys(min(), max());
+}
+
+/**
+ * 范围查找
+ * 
+ * @param low
+ * @param high
+ * @return
+ */
+public Iterable<K> keys(K low, K high) {
+    List<K> list = new ArrayList<>();
+    keys(root, list, low, high);
+    return list;
+}
+
+private void keys(Node<K, V> parent, List<K> list, K low, K high) {
+    if (parent == null) {
+        return;
+    }
+
+    int cmpLow = low.compareTo(parent.key);
+    int cmpHigh = high.compareTo(parent.key);
+
+    if (cmpLow < 0) {
+        keys(parent.left, list, low, high);
+    }
+
+    if (cmpLow <= 0 && cmpHigh >= 0) {
+        list.add(parent.key);
+    }
+
+    if (cmpHigh > 0) {
+        keys(parent.right, list, low, high);
+    }
+}
+```
 

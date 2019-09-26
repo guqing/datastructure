@@ -4,6 +4,7 @@
   <strong>
     个人学习笔记及总结希望能给需要的人提供一个参考
   </strong>
+  <br>
 </div>
 
 <div align="center">
@@ -11,6 +12,7 @@
     <img src="https://img.shields.io/badge/license-MIT-green"	alt="GitHub License">
     <img alt="GitHub code size in bytes" src="https://img.shields.io/github/languages/code-size/guqing/datastructure">
     <img alt="GitHub language count" src="https://img.shields.io/github/languages/count/guqing/datastructure">
+    <img alt="Travis build" src="https://www.travis-ci.org/guqing/datastructure.svg?branch=master">
     <img alt="CodeFactor Grade" src="https://img.shields.io/codefactor/grade/github/guqing/datastructure/master">
     <img src="https://img.shields.io/badge/Author-guqing-orange.svg"	alt="Github Author">
 </div>
