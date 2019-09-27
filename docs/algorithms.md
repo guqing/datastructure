@@ -5909,3 +5909,128 @@ private void keys(Node<K, V> parent, List<K> list, K low, K high) {
 }
 ```
 
+## 哈夫曼树
+1. 给定n个权值作为n个叶子节点，构造一棵二叉树，若该树的带权路径长度(wpl)达到最小，称这样的二叉树为最优二叉树，也成为哈夫曼树(Huffman Tree)
+2. 哈夫曼树是带权路径长度最短的树，权值较大的节点离根较近。
+
+概念解释：
+
+1. 路径和长度：在一棵树中，从一个节点往下可以达到的孩子或孙子节点之间的通路，称之为路径。通路中分支的数目称为路径长度。若规定根节点的层数为1，则从根节点到第L层节点的路径长度为L-1。
+2. 节点的权及带权路径长度：若将树中的节点赋给一个有着某种含义的数值，则这个数值称为该节点的权，节点的带权路径长度为：从根节点到该节点之间的路径长度与该节点的权的乘积。
+3. 树的带权路径长度：树的带权路径长度规定为所有鞋子节点的带权路径长度之和，记为WPL,权值越大的节点离根节点越近，这样的二叉树才是最优二叉树。
+4. WPL最小的就是哈夫曼树。
+
+![1569584840437](assets/1569584840437.png)
+
+### 哈夫曼树创建思路图解
+
+例如使用数据{13, 7, 8, 3, 29, 6, 1}构建一棵哈夫曼树
+
+步骤：
+
+1. 从小到大进行排序，每一个数据都是一个节点，每个节点都可以看作一棵最简单的二叉树
+2. 取出根节点权值最小的两棵二叉树
+3. 组成一棵新的二叉树，该新的二叉树的根节点的权值是前面两棵二叉树根节点权值的和
+4. 在将两棵新的二叉树，以根节点的权值大小再次排序，不断重复1，2，3，4的步骤直到数列中，所有的数据都被处理，就得到一棵哈夫曼树。
+
+### 代码实现
+
+```java
+/**
+ * 哈夫曼树
+ * @author guqing
+ */
+public class HuffmanTree {
+	private Node root;
+	
+	private class Node implements Comparable<Node>{
+		private int value;
+		private Node left;
+		private Node right;
+		
+		public Node(int value) {
+			this.value = value;
+		}
+        
+		@Override
+		public int compareTo(Node that) {
+			 return this.value - that.value;
+		}
+	}
+	
+	
+	public HuffmanTree(int[] array) {
+		root = buildHuffman(array);
+	}
+	
+	private Node buildHuffman(int[] array) {
+		List<Node> nodes = new ArrayList<>();
+		// 遍历array
+		for(int i=0; i< array.length; i++) {
+			// 将array的每个元素构建成一个Node并放入到ArrayList中
+			nodes.add(new Node(array[i]));
+		}
+		
+		while(nodes.size() > 1) {
+			// 对集合进行排序
+			Collections.sort(nodes);
+			
+			// 取出根节点权值最小的两棵二叉树(单个节点也可以看成最简单的二叉树)
+			Node leftNode = nodes.get(0);
+			Node rightNode = nodes.get(1);
+			
+			// 构建一棵新的二叉树
+			Node parent = new Node(leftNode.value + rightNode.value);
+			parent.left = leftNode;
+			parent.right = rightNode;
+			
+			// 从nodes集合中删除leftNode和rightNode
+			nodes.remove(leftNode);
+			nodes.remove(rightNode);
+			
+			// 将parent加入到nodes中
+			nodes.add(parent);
+		}
+		
+		// 返回哈夫曼树的root节点
+		return nodes.get(0);
+	}
+	
+	public String preorder() {
+		List<Integer> list = new ArrayList<>();
+		preorder(root, list);
+		return list.toString();
+	}
+	
+	private void preorder(Node parent, List<Integer> list) {
+		list.add(parent.value);
+		if(hasLeftChild(parent)) {
+			preorder(parent.left, list);
+		}
+		
+		if(hasRightChild(parent)) {
+			preorder(parent.right, list);
+		}
+	}
+	private boolean hasLeftChild(Node parent) {
+		if(parent.left != null) {
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean hasRightChild(Node parent) {
+		if(parent.right != null) {
+			return true;
+		}
+		return false;
+	}
+	
+	public static void main(String[] args) {
+		int[] array = {13, 7, 8, 3, 29, 6, 1};
+		HuffmanTree huffmanTree = new HuffmanTree(array);
+		System.out.println(huffmanTree.preorder());
+	}
+}
+```
+
