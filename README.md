@@ -4,9 +4,8 @@
   <strong>
     个人学习笔记及总结希望能给需要的人提供一个参考
   </strong>
-  <br>
 </div>
-
+ <br/>
 <div align="center">
     <img alt="GitHub last commit" src="https://img.shields.io/github/last-commit/guqing/datastructure">
     <img src="https://img.shields.io/badge/license-MIT-green"	alt="GitHub License">
