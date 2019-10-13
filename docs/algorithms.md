@@ -6365,5 +6365,393 @@ public static void main(String[] args) {
 }
 ```
 
+## 多路查找树
 
+二叉树的操作效率较高，但是也存在问题
+
+![351812564,34444298](assets/351812564,34444298.jpg)
+
+树的高度为：4
+
+节点个数：2<sup>4</sup>-1 = 15
+
+二叉树需要加载到内存，如果二叉树的节点少则不会有什么问题，但是如果二叉树的节点很多（比如有1亿节点）就会存在如下问题：
+
+1. 在构建二叉树时，需要多次进行I/O操作(海里数据存储在数据库或文件中)，节点海量，构建二叉树时，速度有影响
+2. 节点海量，也会造成树的高度很大，降低操作速度
+
+为了解决上述问题提出多叉树
+
+1. 二叉树中，每个节点有数据项，最多有两个子节点。如果允许每个节点可以有更多的数据项或更多的子节点，就是多叉树(`multiway tree`)
+2. 多叉树通过重新组织节点，减少了数得高度，能对二叉树进行优化
+3. 对多叉树中的`2-3树`举例如下：
+
+![1570954543713](assets/1570954543713.png)
+
+### 2-3树
+
+1. `2-3树`的所有叶子节点都在同一层
+2. 有两个子节点的节点叫二节点，二节点要么没有子节点，要么有两个子节点
+3. 有三个子节点的节点叫三节点，三节点要么没有子节点，要么有三个子节点
+4. `2-3树`是由二节点和三节点构成的树
+
+插入规则：
+
+1. 2-3树的所有叶子节点都在同一层
+2. 有两个子节点的节点叫二节点
+3. 有三个子节点的节点叫三节点
+4. 当按照规则插入一个数到某个节点时，不能满足上面三个要求就需要拆分，先向上拆，如果上层满，则拆本层，拆后任然需要满足上面三个条件
+5. 对于三节点的子树的值大小仍然遵守BST二叉排序树的规则
+
+#### 插入节点情况
+
+ 本节内容来源于:算法 英文版第4版  Robert Sedgewick译本
+
+**向2- 结点中插入新键：**
+
+要在2-3树中插入一个新结点，我们可以和二叉查找树 一样先进行一次未命中的查找，然后把新结点挂在树的底部。插入K但这样的话树无法保持完美平衡性。 2-3树的主要 原因就在于它能够在插入后继续保持平衡。如果未命中的查 找结束于一个2-结点，事情就好办了 ：我们只要把这个2-结点替换为一个3-结点，将要插入的键保存在其中即可（如下图所示）。如果未命中的查找结束于一个3-结点，事情就要麻烦一些。 
+
+![1570957495292](assets/1570957495292.png)
+
+**向一棵只含有一个3节点的树中插入新键**
+
+在考虑一般情况之前，先假设我们需要向一棵只含有一 个 3-结点的树中插人一个新键。这棵树中有两个键，所以在它唯一的结点中已经没有可插人新键的空间了。为了将新键插人，我们先临时将新键存入该结 点中，使之成为一个4-结点。它很自然地扩展了以前的结点并含有3个键和4 条链接。创建一个4- 结点很方便，因为很容易将它转换为一棵由3个2-结点组成的2-3树•，其中一个结点（根 ） 含有中键，一个结点含有3个键中的最小者（和根结点的左链接相连) ，一个结点含有3个键中的最大者（和根结点的右链接相连）。这棵树既是一棵含有3个结点的二叉查找树，同时也是一棵完美平衡的2-3 树，因为其中所有的空链接到根结点的距离都相等。插人前树的高度为0，插人后树的高度为1。
+这个例子很简单但却值得学习，它说明了 2-3树是如何生长的，如图3.3.4所示：
+
+![1570957601439](assets/1570957601439.png)
+
+**向一个父节点为2节点的三节点中插入新键**
+
+作为第二轮热身，假设未命中的查找结束于一个3-结点，而它的父结点是一个2-结点。在这 种情况下我们需要在维持树的完美平衡的前提下为新键腾出空间。我们先像刚才一样构造一个临时的4-结点并将其分解，但此时我们不会为中键创建一个新结点，而是将其移动至原来的父结点中。
+你可以将这次转换看成将指向原3- 结点的一条链接替换为新父结点中的原中键左右两边的两条链 接，并分别指向两个新的2-结点。根据我们的假设，父结点中是有空间的：父结点是一个2-结点（一 个键两条链接），插人之后变为了一个3-结点（两个键3 条链接）。另外，这次转换也并不影响（完 美平衡的）2-3树的主要性质。树仍然是有序的，因为中键被移动到父结点中去了；树仍然是完美 
+平衡的，插入后所有的空链接到根结点的距离仍然相同。请确认你完全理解了这次转换—— 它是2-3 树的动态变化的核心，其过程如图3.3.5所示。
+
+![1570957684489](assets/1570957684489.png)
+
+ **向一 个父结点为3-结点的3-结点中插入新键** 
+
+现在假设未命中的查找结束于一个父结点为3- 结点的结点。我们再次和刚才一样构造一个 临时的4-结点并分解它，然后将它的中键插入它的父结点中。但父结点也是一个3-结点，因此 我们再用这个中键构造一个新的临时4-结点，然后在这个结点上进行相同的变换，即分解这个 父结点并将它的中键插入到它的父结点中去。推广到一般情况，我们就这样一直向上不断分解临 时的4-结点并将中键插入更高层的父结点，直至遇到一个2- 结点并将它替换为一个不需要继续 分解的3-结点，或者是到达3-结点的根。该过程如图3.3.6所示。
+
+![1570957742601](assets/1570957742601.png) 
+
+ **分解根结点**
+
+如果从插入结点到根结点的路径上全都是3-结点，我们的根结点最终变成一个临时的4-结点。
+此时我们可以按照向一棵只有一个3-结点的树中插入新键的方法处理这个问题。我们将临时的4- 结点分解为3个 2-结点，使得树高加1 , 如图3.3.7所示。请注意，这次最后的变换仍然保持了树 的完美平衡性，因为它变换的是根结点。
+
+![1570957806213](assets/1570957806213.png)
+
+**局部变换** 
+
+将一个4-结点分解为一棵2-3树可能有6种情况，都总结在了图3.3.8中。这个4-结点可能是 根结点，可能是一个2-结点的左子结点或者右子结点，也可能是一个3-结点的左子结点、中子结点或者右子结点。2-3树插人算法的根本在于这些变换都是局部的：除了相关的结点和链接之外不必修改或者检查树的其他部分。每次变换中，变更的链接数量不会超过一个很小的常数。需要特别 指出的是，不光是在树的底部，树中的任何地方只要符合相应的模式，变换都可以进行。每个变换 都会将4-结点中的一个键送入它的父结点中，并重构相应的链接而不必涉及树的其他部分。
+
+![1570957868959](assets/1570957868959.png)
+
+**全局性质** 
+
+这些局部变换不会影响树的全局有序性和平衡性：任意空链接到根结点的路径长度都是相等 的。作为参考，图 3.3.9所示的是当一个4-结点是一个3-结点的中子结点时的完整变换情况。如果在变换之前根结点到所有空链接的路径长度为h，那么变换之后该长度仍然为h。所有的变换都 具有这个性质，即使是将一个4-结点分解为两个2-结点并将其父结点由2-结点变为3-结点，或 是由3-结点变为一个临时的4-结点时也是如此。当根结点被分解为3个 2-结点时，所有空链接到根结点的路径长度才会加1。
+
+![1570957939641](assets/1570957939641.png)
+
+和标准的二叉查找树由上向下生长不同，2-3树的生长是由下向上的。如果你花点时间仔细研 究一下图3.3.10，就能很好地理解2-3树的构造方式。它给出了我们的标准索引测试用例中产生的 一系列2-3树，以及一系列由同一组键按照升序依次插入到树中时所产生的所有2-3树。还记得在 二叉查找树中，按照升序插入10个键会得到高度为9 的一棵最差查找树吗？如果使用2-3树，树 的局度是2。
+
+以上的文字已经足够为我们定义一个使用2-3树作为数据结构的符号表的实现了。2-3树的分 析和二叉查找树的分析大不相同，因为我们主要感兴趣的是最坏情况下的性能，而非一般情况（这种情况下我们会用随机键模型分析预期的性能）。在符号表的实现中，一般我们无法控制用例会按 照什么顺序向表中插人键，因此对最坏情况的分析是唯一能够提供性能保证的办法。
+
+![1570957995565](assets/1570957995565.png)
+
+### B树
+
+[B-tree](https://baike.baidu.com/item/B-tree/6606402)树即B树]，B即Balanced，平衡的意思。有人把B-tree翻译成B-树，容易让人产生误解。会以为B-树是一种树，而B树又是另一种树。实际上，B-tree就是指的B树。
+
+B树通过重新组织节点，降低树的高度，并减少I/O操作次数来提升效率
+
+![1570955917370](assets/1570955917370.png)
+
+1. 如图B树通过重新组织节点，降低了树的高度
+2. 文件系统及数据库系统的设计者利用了磁盘预读原理，讲一个节点的大小设计等于一个页(一页大小通常为4K),这样每个节点只需要依次I/O就可以完全载入
+3. 将树的度M设置为1024，在600亿个元素中最多需要4次I/O操作就可以读取到想要的元素，B树广泛应用于文件存储系统以及数据库系统中
+
+前面已经介绍了2-3树，它就是B树(英语：B-tree 也写成B-树)，这里我们再做一个说明，我们在学习Mysql时，经常听到说某种类型的索引是基于B树或者B+树的，如图:
+
+![1570969833537](assets/1570969833537.png)
+
+**B树的说明:**
+
+1. B树的阶：节点的最多子节点个数。比如2-3树的阶是3，2-3-4树的阶是4
+
+2. B-树的搜索，从根结点开始，对结点内的关键字（有序）序列进行二分查找，如果命中则结束，否则进入查询关键字所属范围的儿子结点；重复，直到所对应的儿子指针为空，或已经是叶子结点
+
+3. 关键字集合分布在整颗树中, 即叶子节点和非叶子节点都存放数据.
+
+4. 搜索有可能在非叶子结点结束
+
+5. 其搜索性能等价于在关键字全集内做一次二分查找
+
+### 代码实现
+
+```java
+public class BTree<K extends Comparable<K>, V>  {
+    // 每个b树节点的最大子节点数= M-1(必须是偶数且大于2)
+    private static final int M = 4;
+
+    // B-tree的根节点
+    private Node root;
+    // B-tree的高度
+    private int height;
+    // B树中键值对的数量
+    private int n;
+
+    // B树的辅助节点数据类型
+    private static final class Node {
+        // 子节点的数量
+        private int m;
+        // 子节点数组
+        private Entry[] children = new Entry[M];
+
+        // 创建一个包含k个子节点的节点
+        private Node(int k) {
+            m = k;
+        }
+    }
+
+    // 内部节点:只使用key和next
+    // 外部节点:只使用key和value
+    @SuppressWarnings("rawtypes")
+    private static class Entry {
+		private Comparable key;
+        private final Object val;
+        // 帮助字段来遍历数组item
+        private Node next;
+        public Entry(Comparable key, Object val, Node next) {
+            this.key  = key;
+            this.val  = val;
+            this.next = next;
+        }
+    }
+
+    /**
+     * 初始化一棵空的B-tree.
+     */
+    public BTree() {
+        root = new Node(0);
+    }
+ 
+    /**
+     * 如果此符号表为空，则返回true
+     * @return {@code true} if this symbol table is empty; {@code false} otherwise
+     */
+    public boolean isEmpty() {
+        return size() == 0;
+    }
+
+    /**
+     * 返回此符号表中的键值对的数目
+     * @return 此符号表中的键值对的数目
+     */
+    public int size() {
+        return n;
+    }
+
+    /**
+     * 返回此B-Tree的高度(用于调试)
+     *
+     * @return B-tree的高度
+     */
+    public int height() {
+        return height;
+    }
+
+
+    /**
+     * 返回与给定键关联的值
+     *
+     * @param  key the key
+     * @return the value 如果给定的键存在则返回否则返回null
+     * @throws IllegalArgumentException if {@code key} is {@code null}
+     */
+    public V get(K key) {
+        if (key == null) throw new IllegalArgumentException("argument to get() is null");
+        return search(root, key, height);
+    }
+
+    @SuppressWarnings("unchecked")
+	private V search(Node x, K key, int ht) {
+        Entry[] children = x.children;
+
+        // 外部节点
+        if (ht == 0) {
+            for (int j = 0; j < x.m; j++) {
+                if (eq(key, children[j].key)) {
+                	return (V) children[j].val;
+                }
+            }
+        }
+
+        // 内部节点
+        else {
+            for (int j = 0; j < x.m; j++) {
+                if (j+1 == x.m || less(key, children[j+1].key)) {
+                	return search(children[j].next, key, ht-1);
+                }
+            }
+        }
+        
+        return null;
+    }
+
+
+    /**
+     * 将键-值对插入符号表，如果键已经在符号表中，则用新值覆盖旧值。如果该值为空，则有效地从符号表中删除键。
+     * @param  key the key
+     * @param  val the value
+     * @throws IllegalArgumentException if {@code key} is {@code null}
+     */
+    public void put(K key, V val) {
+        if (key == null) throw new IllegalArgumentException("argument key to put() is null");
+        Node u = insert(root, key, val, height); 
+        n++;
+        if (u == null) {
+        	return;
+        }
+
+        // 需要分割根节点
+        Node t = new Node(2);
+        t.children[0] = new Entry(root.children[0].key, null, root);
+        t.children[1] = new Entry(u.children[0].key, null, u);
+        root = t;
+        height++;
+    }
+
+    private Node insert(Node h, K key, V val, int ht) {
+        int j;
+        Entry t = new Entry(key, val, null);
+
+        // 外部节点
+        if (ht == 0) {
+            for (j = 0; j < h.m; j++) {
+                if (less(key, h.children[j].key)) break;
+            }
+        }
+
+        // 内部节点
+        else {
+            for (j = 0; j < h.m; j++) {
+                if ((j+1 == h.m) || less(key, h.children[j+1].key)) {
+                    Node u = insert(h.children[j++].next, key, val, ht-1);
+                    if (u == null){
+                    	return null;
+                    }
+                    t.key = u.children[0].key;
+                    t.next = u;
+                    break;
+                }
+            }
+        }
+
+        for (int i = h.m; i > j; i--) {
+        	h.children[i] = h.children[i-1];
+        }
+        h.children[j] = t;
+        h.m++;
+        if (h.m < M) {
+        	return null;
+        } else  {
+        	return split(h);
+        }
+    }
+
+    // 将节点一分为二
+    private Node split(Node h) {
+        Node t = new Node(M/2);
+        h.m = M/2;
+        for (int j = 0; j < M/2; j++) {
+        	t.children[j] = h.children[M/2+j]; 
+        }
+        return t;    
+    }
+
+    /**
+     * 返回此B树的字符串表示形式(用于调试)。
+     *
+     * @return 这个B树的字符串表示
+     */
+    public String toString() {
+        return toString(root, height, "") + "\n";
+    }
+
+    private String toString(Node h, int ht, String indent) {
+        StringBuilder s = new StringBuilder();
+        Entry[] children = h.children;
+
+        if (ht == 0) {
+            for (int j = 0; j < h.m; j++) {
+                s.append(indent + children[j].key + " " + children[j].val + "\n");
+            }
+        }
+        else {
+            for (int j = 0; j < h.m; j++) {
+                if (j > 0) {
+                	s.append(indent + "(" + children[j].key + ")\n");
+                }
+                s.append(toString(children[j].next, ht-1, indent + "     "));
+            }
+        }
+        return s.toString();
+    }
+
+
+    // 比较函数,判断k1是否小于k2
+    @SuppressWarnings({"unchecked", "rawtypes"})
+	private boolean less(Comparable k1, Comparable k2) {
+        return k1.compareTo(k2) < 0;
+    }
+
+    // 比较k1和k2是否相等
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private boolean eq(Comparable k1, Comparable k2) {
+        return k1.compareTo(k2) == 0;
+    }
+
+
+    /**
+     * 测试BTree的功能。
+     */
+    public static void main(String[] args) {
+        BTree<String, String> st = new BTree<String, String>();
+
+        st.put("www.cs.princeton.edu", "128.112.136.12");
+        st.put("www.cs.princeton.edu", "128.112.136.11");
+        st.put("www.princeton.edu",    "128.112.128.15");
+        st.put("www.yale.edu",         "130.132.143.21");
+        st.put("www.simpsons.com",     "209.052.165.60");
+        st.put("www.apple.com",        "17.112.152.32");
+        st.put("www.amazon.com",       "207.171.182.16");
+        st.put("www.ebay.com",         "66.135.192.87");
+        st.put("www.cnn.com",          "64.236.16.20");
+        st.put("www.google.com",       "216.239.41.99");
+        st.put("www.nytimes.com",      "199.239.136.200");
+        st.put("www.microsoft.com",    "207.126.99.140");
+        st.put("www.dell.com",         "143.166.224.230");
+        st.put("www.slashdot.org",     "66.35.250.151");
+        st.put("www.espn.com",         "199.181.135.201");
+        st.put("www.weather.com",      "63.111.66.11");
+        st.put("www.yahoo.com",        "216.109.118.65");
+
+
+        System.out.println("cs.princeton.edu:  " + st.get("www.cs.princeton.edu"));
+        System.out.println("hardvardsucks.com: " + st.get("www.harvardsucks.com"));
+        System.out.println("simpsons.com:      " + st.get("www.simpsons.com"));
+        System.out.println("apple.com:         " + st.get("www.apple.com"));
+        System.out.println("ebay.com:          " + st.get("www.ebay.com"));
+        System.out.println("dell.com:          " + st.get("www.dell.com"));
+        System.out.println();
+
+        System.out.println("size:    " + st.size());
+        System.out.println("height:  " + st.height());
+        System.out.println(st);
+        System.out.println();
+    }
+
+}
+```
 
