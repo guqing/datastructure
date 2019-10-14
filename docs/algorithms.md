@@ -6755,3 +6755,387 @@ public class BTree<K extends Comparable<K>, V>  {
 }
 ```
 
+## 图
+
+### 概念
+
+图（graph）是数据结构和算法学中最强大的框架之一（或许没有之一）。图几乎可以用来表现所有类型的结构或系统，从交通网络到通信网络，从下棋游戏到最优流程，从任务分配到人际交互网络，图都有广阔的用武之地。
+
+而要进入图论的世界，清晰、准确的基本概念是必须的前提和基础。下面对其最核心和最重要的概念作出说明。关于图论的概念异乎寻常的多，先掌握下面最核心最重要的，足够开展一些工作了，其它的再到实践中不断去理解和熟悉吧。
+
+图（graph）并不是指图形图像（image）或地图（map）。通常来说，我们会把图视为一种由“顶点”组成的抽象网络，网络中的各顶点可以通过“边”实现彼此的连接，表示两顶点有关联。注意上面图定义中的两个关键字，由此得到我们最基础最基本的2个概念，顶点（vertex）和边（edge）。
+
+ ![img](assets/e824b899a9014c086219d4cd1e29370d7bf4f40b.jpeg)
+
+**顶点：**
+
+ 上图中红色节点就是顶点，表示某个事物或对象。由于图的术语没有标准化，因此，称顶点为点、节点、结点、端点等都是可以的。叫什么无所谓，理解是什么才是关键。  
+
+**边：**
+
+ 上图中顶点之间黑色的线条就是边，表示事物与事物之间的关系。需要注意的是边表示的是顶点之间的逻辑关系，粗细长短都无所谓的。包括上面的顶点也一样，表示逻辑事物或对象，画的时候大小形状都无所谓。 
+
+### 图的表示方式
+
+图的表示方式有两种：二维数组表示(邻接矩阵)，链表表示(邻接表)
+
+**邻接矩阵**
+
+​     邻接矩阵是表示图形中顶点之间相邻关系的矩阵，对于n个顶点的图而言，矩阵是的row和col表示的是1....n个点。 
+
+![1571028041708](assets/1571028041708.png)
+
+```java
+/**
+ * 图的邻接矩阵表示
+ * @author guqing
+ */
+public class MatrixGraph {
+	private List<String> nodes;
+	private int[][] edges;
+	// 边的数目
+	private int edgeCount;
+	
+	
+	public MatrixGraph() {
+		this(1);
+	}
+	
+	public MatrixGraph(int initialCapacity) {
+		if(initialCapacity < 1) {
+			initialCapacity = 1;
+		}
+		// 初始化矩阵和顶点
+		edges = new int[initialCapacity][initialCapacity];
+		nodes = new ArrayList<>(initialCapacity);
+		edgeCount = 0;
+	}
+	
+	public int getNodeCount() {
+		return nodes.size();
+	}
+	
+	public int getEdgeCount() {
+		return edgeCount;
+	}
+	
+	public String get(int index) {
+		return nodes.get(index);
+	}
+	
+	public int getWeight(int v1, int v2) {
+		return edges[v1][v2];
+	}
+	
+	public void show() {
+		for(int[] edge : edges) {
+			System.out.println(Arrays.toString(edge));
+		}
+	}
+	
+	// 添加顶点
+	public void addNode(String node) {
+		nodes.add(node);
+	}
+	
+	/**
+	 * @param v1 表示第1个点的下标例如表示A-B的关系 A->0 B->1
+	 * @param v2 表示第2个点的下标
+	 * @param weight 表示关系值,用1表示有关系
+	 */
+	public void addEdge(int v1, int v2, int weight) {
+		edges[v1][v2] = weight;
+		edges[v2][v1] = weight;
+		edgeCount++;
+	}
+	
+	public static void main(String[] args) {
+		String[] nodes = {"A", "B", "C", "D", "E"};
+		MatrixGraph graph = new MatrixGraph(5);
+		// 添加顶点
+		for(String node : nodes) {
+			graph.addNode(node);
+		}
+		// 添加边,描述边的关系
+		// A-B,A-C,B-C,B-D,B-E
+		graph.addEdge(0, 1, 1);//A-B
+		graph.addEdge(0, 2, 1);//A-C
+		graph.addEdge(1, 2, 1);//B-C
+		graph.addEdge(1, 3, 1);//B-D
+		graph.addEdge(1, 4, 1);//B-E
+		
+		graph.show();
+	}
+}
+```
+
+**邻接表**
+
+1. 邻接矩阵需要为每个顶点都分配n个边的空间，其实有很多边都是不存在,会造成空间的一定损失。
+
+2. 邻接表的实只心存在的边，不关心不存在的边接表由数组链表组
+
+![1571028357400](assets/1571028357400.png)
+
+> **说明：**
+>
+> 1. 标号为0的结点的相关联的结点为 1 2 3 4
+>
+> 2. 标号为1的结点的相关联结点为0 4，
+>
+> 3. 标号为2的结点相关联的结点为 0 4 5
+>
+> 4. ....
+
+### 图的深度优先遍历
+
+使用先前的`MatrixGraph`类稍作修改:
+
+```java
+public class MatrixGraph {
+	private List<String> nodes;
+	private int[][] edges;
+	// 边的数目
+	private int edgeCount;
+	
+	// 遍历时使用的标记
+	private int initialCapacity;
+	private boolean[] marked;
+	
+	
+	public MatrixGraph() {
+		this(1);
+	}
+	
+	public MatrixGraph(int initialCapacity) {
+		if(initialCapacity < 1) {
+			initialCapacity = 1;
+		}
+		// 初始化矩阵和顶点
+		edges = new int[initialCapacity][initialCapacity];
+		nodes = new ArrayList<>(initialCapacity);
+		edgeCount = 0;
+		// 为全局初始化容量赋值
+		this.initialCapacity = initialCapacity;
+	}
+	
+	public int getNodeCount() {
+		return nodes.size();
+	}
+	
+	public int getEdgeCount() {
+		return edgeCount;
+	}
+	
+	public String get(int index) {
+		return nodes.get(index);
+	}
+	
+	public int getWeight(int v1, int v2) {
+		return edges[v1][v2];
+	}
+	
+	public void show() {
+		for(int[] edge : edges) {
+			System.out.println(Arrays.toString(edge));
+		}
+	}
+	
+	// 添加顶点
+	public void addNode(String node) {
+		nodes.add(node);
+	}
+	
+	/**
+	 * @param v1 表示第1个点的下标例如表示A-B的关系 A->0 B->1
+	 * @param v2 表示第2个点的下标
+	 * @param weight 表示关系值,用1表示有关系
+	 */
+	public void addEdge(int v1, int v2, int weight) {
+		edges[v1][v2] = weight;
+		edges[v2][v1] = weight;
+		edgeCount++;
+	}
+	
+	// 重载dfs,遍历所有的节点
+	public String dfs() {
+		// 为了深度优先遍历和广度优先遍历都可以使用，这个公用的marked需要单独初始化
+		marked = new boolean[initialCapacity];
+		List<String> list = new ArrayList<>();
+		for(int i=0; i<getNodeCount(); i++) {
+			if(!marked[i]) {
+				dfs(marked, i, list);
+			}
+		}
+		return list.toString();
+	}
+	
+	// 得到第一个邻接点的下标w
+	private int getFirstAdjNode(int index) {
+		for(int i=0; i< nodes.size(); i++) {
+			if(edges[index][i] > 0) {
+				return i;
+			}
+		}
+		return -1;
+	}
+	
+	// 根据前一个邻接点的下标来获取下一个邻接节点
+	private int getNextAdjNode(int v1, int v2) {
+		for(int j = v2 + 1; j<nodes.size(); j++) {
+			if(edges[v1][j] > 0) {
+				return j;
+			}
+		}
+		return -1;
+	}
+}
+```
+
+
+
+所谓图的遍历，即是对结点的访问。一个图有那么多个结点，如何遍历这些结点，需要特定策略，一般有两种访问策略:
+
+1. 深度优先遍历
+
+2. 广度优先遍历 
+
+**图的深度优先搜索(Depth First Search简称：DFS)**
+
+1. 深度优先遍历，从初始访问结点出发，初始访问结点可能有多个邻接结点，深度优先遍历的策略就是首先访问第一个邻接结点，然后再以这个被访问的邻接结点作为初始结点，访问它的第一个邻接结点， 可以这样理解：每次都在访问完**当前结点**后首先访问**当前结点的第一个邻接结点**。
+
+2. 我们可以看到，这样的访问策略是优先往纵向挖掘深入，而不是对一个结点的所有邻接结点进行横向访问。
+
+3. 显然，深度优先搜索是一个递归的过程
+
+**步骤：**
+
+1. 访问初始结点v，并标记结点v为已访问。
+
+2. 查找结点v的第一个邻接结点w。
+
+3. 若w存在，则继续执行4，如果w不存在，则回到第1步，将从v的下一个结点继续。
+
+4. 若w未被访问，对w进行深度优先遍历递归（即把w当做另一个v，然后进行步骤123）。
+
+5. 查找结点v的w邻接结点的下一个邻接结点，转到步骤3。
+
+```java
+// 重载dfs,遍历所有的节点
+public String dfs() {
+    List<String> list = new ArrayList<>();
+    for(int i=0; i<getNodeCount(); i++) {
+        if(!marked[i]) {
+            dfs(marked, i, list);
+        }
+    }
+    return list.toString();
+}
+
+// 深度优先遍历
+private void dfs(boolean[] marked, int index, List<String> list) {
+    // 为了深度优先遍历和广度优先遍历都可以使用，这个公用的marked需要单独初始化
+	marked = new boolean[initialCapacity];
+    
+    // 首先访问该节点即添加到容器中最后统一输出
+    list.add(get(index));
+
+    // 将该节点设置为已访问
+    marked[index] = true;
+
+    // 查找节点index的第一个邻接节点w
+    int w = getFirstAdjNode(index);
+    // 有邻接节点
+    while(w != -1) {
+        if(!marked[w]) {
+            // 该节点没有被访问过
+            dfs(marked, w, list);
+        }
+        // 如果w节点已经被访问过,查找邻接节点的下一个节点
+        w = getNextAdjNode(index, w);
+    }
+}
+```
+
+### 图的广度优先遍历
+
+图的广度优先搜索(Broad First Search) 。
+
+类似于一个分层搜索的过程，广度优先遍历需要使用一个队列以保持访问过的结点的顺序，以便按这个顺序来访问这些结点的邻接结
+
+**步骤**
+
+1. 访问初始结点v并标记结点v为已访问。
+
+2. 结点v入队列
+
+3. 当队列非空时，继续执行，否则算法结束。
+
+4. 出队列，取得队头结点u。
+
+5. 查找结点u的第一个邻接结点w。
+
+6. 若结点u的邻接结点w不存在，则转到步骤3；否则循环执行以下三个步骤：
+   - 6.1若结点w尚未被访问，则访问结点w并标记为已访问。 
+   - 6.2结点w入队列 
+   - 6.3 查找结点u的继w邻接结点后的下一个邻接结点w，转到步骤6。
+
+```java
+// 遍历所有的节点,都进行广度优先搜索
+public String bfs() {
+    // 为了深度优先遍历和广度优先遍历都可以使用，这个公用的marked需要单独初始化
+    marked = new boolean[initialCapacity];
+
+    List<String> list = new ArrayList<>();
+    for(int i = 0; i<getNodeCount(); i++) {
+        if(!marked[i]) {
+            bfs(marked, i, list);
+        }
+    }
+
+    return list.toString();
+}
+
+/**
+ * 广度优先遍历
+ */
+private void bfs(boolean[] marked, int index, List<String> list) {
+    // 队列的头节点对应的下标
+    int u;
+    // 邻接节点w
+    int w;
+
+    // 队列,记录节点的访问顺序
+    LinkedList<Integer> queue = new LinkedList<>();
+
+    // 输出该元素
+    list.add(get(index));
+
+    // 标记为已访问
+    marked[index] = true;
+    // 将节点加入队列
+    queue.addLast(index);
+
+    while(!queue.isEmpty()) {
+        // 队列非空,从队头取出数据,并从队列删除它
+        u = queue.removeFirst();
+        // 得到第一个邻接点的下标w
+        w = getFirstAdjNode(u);
+        while(w != -1) {
+            // 如果w存在,判断是否访问过
+            if(!marked[w]) {
+                // 输出该元素
+                list.add(get(w));
+
+                // 标记为已访问
+                marked[w] = true;
+                // 加入队列
+                queue.addLast(w);
+            }
+            // 如果已经访问过,以u为前驱节点寻找w后的下一个邻接点
+            w = getNextAdjNode(u, w);
+        }
+    }
+}
+```
+
