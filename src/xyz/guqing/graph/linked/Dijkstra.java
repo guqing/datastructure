@@ -29,7 +29,7 @@ public class Dijkstra {
 
         final Map<Graph.Node<Integer>, Graph.CostPathPair<Integer>> map = new HashMap<Graph.Node<Integer>, Graph.CostPathPair<Integer>>();
         for (Graph.CostNodePair<Integer> pair : costs.values()) {
-            int cost = pair.getCost();
+            double cost = pair.getCost();
             Graph.Node<Integer> vertex = pair.getNode();
             List<Graph.Edge<Integer>> path = paths.get(vertex);
             map.put(vertex, new Graph.CostPathPair<Integer>(cost, path));
@@ -72,7 +72,7 @@ public class Dijkstra {
             if (v.equals(start))
                 costs.put(v, new Graph.CostNodePair<Integer>(0, v));
             else
-                costs.put(v, new Graph.CostNodePair<Integer>(Integer.MAX_VALUE, v));
+                costs.put(v, new Graph.CostNodePair<Integer>(Double.MAX_VALUE, v));
         }
 
         final Queue<Graph.CostNodePair<Integer>> unvisited = new PriorityQueue<Graph.CostNodePair<Integer>>();
@@ -89,8 +89,8 @@ public class Dijkstra {
             for (Graph.Edge<Integer> e : vertex.getEdges()) {
                 final Graph.CostNodePair<Integer> toPair = costs.get(e.getToNode()); // O(1)
                 final Graph.CostNodePair<Integer> lowestCostToThisNode = costs.get(vertex); // O(1)
-                final int cost = lowestCostToThisNode.getCost() + e.getCost();
-                if (toPair.getCost() == Integer.MAX_VALUE) {
+                final double cost = lowestCostToThisNode.getCost() + e.getCost();
+                if (toPair.getCost() == Double.MAX_VALUE) {
                     // Haven't seen this vertex yet
 
                     // Need to remove the pair and re-insert, so the priority queue keeps it's invariants
