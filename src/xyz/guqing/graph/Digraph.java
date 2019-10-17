@@ -3,7 +3,6 @@ package xyz.guqing.graph;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,8 +12,10 @@ public class Digraph<T extends Comparable<T>> {
 	private int nodeCount;
 	// 边的总数
 	private int edgeCount;
+	// 图中的所有边
+	private List<Edge<T>> edges;
 	// 邻接表,adj.get(v)从顶点v指出的所有节点
-	private Map<Node<T>, Set<Node<T>>> adj = new HashMap<>();
+	private Map<Node<T>, List<Node<T>>> adj = new HashMap<>();
 	
 	public static class Node<T extends Comparable<T>> implements Comparable<Node<T>>{
 		private T value;
@@ -246,15 +247,16 @@ public class Digraph<T extends Comparable<T>> {
 		if (edges == null) {
 			throw new IllegalArgumentException("the parameter edges cannot be null");
 		}
-
+		this.edges = edges;
 		this.edgeCount = edges.size();
-		// 设置邻接表
+		// 设置顶点邻接表
 		for (Edge<T> edge : edges) {
 			Node<T> from = edge.getFrom();
 			Node<T> to = edge.getTo();
-			Set<Node<T>> fromEdgeSet = adj.get(from);
+			
+			List<Node<T>> fromEdgeSet = adj.get(from);
 			if (fromEdgeSet == null) {
-				fromEdgeSet = new HashSet<>();
+				fromEdgeSet = new ArrayList<>();
 				fromEdgeSet.add(to);
 				adj.put(from, fromEdgeSet);
 			} else {
@@ -262,9 +264,9 @@ public class Digraph<T extends Comparable<T>> {
 			}
 
 			// 保证节点不遗漏
-			Set<Node<T>> toEdgeSet = adj.get(to);
+			List<Node<T>> toEdgeSet = adj.get(to);
 			if (toEdgeSet == null) {
-				toEdgeSet = new HashSet<>();
+				toEdgeSet = new ArrayList<>();
 				adj.put(to, toEdgeSet);
 			}
 		}
@@ -293,10 +295,10 @@ public class Digraph<T extends Comparable<T>> {
 	 * @param s vertex s
 	 * @return a collection of adjacency points of vertex {@code s}
 	 */
-	public Set<Node<T>> getAdjNode(Node<T> s) {
+	public List<Node<T>> getAdjNodes(Node<T> s) {
 		return adj.get(s);
 	}
-
+	
 	/**
 	 * Returns nodes in digraph
 	 * @return nodes in digraph
@@ -314,5 +316,14 @@ public class Digraph<T extends Comparable<T>> {
 		List<Node<T>> nodeList = new ArrayList<>(adj.keySet());
 		Collections.sort(nodeList);
 		return nodeList;
+	}
+	
+	/**
+	 * Returns the edge collection in digraph
+	 * @return edge collection if there is a edge in digraph,
+	 *         otherwise NULL
+	 */
+	public List<Edge<T>> getEdges() {
+		return this.edges;
 	}
 }

@@ -19,7 +19,7 @@ import xyz.guqing.queue.Queue;
  */
 public class DepthFirstOrder<T extends Comparable<T>> {
 	// marked[v] = has v been marked in dfs?
-	 private Set<Node<T>> marked;
+	private Set<Node<T>> marked;
 	// pre[v] = preorder number of v
 	private Map<Node<T>, Integer> pre;
 	// post[v] = postorder number of v
@@ -59,7 +59,7 @@ public class DepthFirstOrder<T extends Comparable<T>> {
 		marked.add(v);
 		pre.put(v, preCounter++);
 		preorder.enqueue(v);
-		for (Node<T> w : graph.getAdjNode(v)) {
+		for (Node<T> w : graph.getAdjNodes(v)) {
 			if (!marked.contains(w)) {
 				dfs(graph, w);
 			}

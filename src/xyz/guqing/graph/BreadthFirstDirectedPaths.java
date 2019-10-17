@@ -82,7 +82,7 @@ public class BreadthFirstDirectedPaths<T extends Comparable<T>> {
 		queue.enqueue(s);
 		while (!queue.isEmpty()) {
 			Node<T> v = queue.dequeue();
-			for (Node<T> w : graph.getAdjNode(v)) {
+			for (Node<T> w : graph.getAdjNodes(v)) {
 				if (!marked.contains(w)) {
 					edgeTo.put(w, v);
 					distTo.put(w, distTo.get(v) + 1);
@@ -103,7 +103,7 @@ public class BreadthFirstDirectedPaths<T extends Comparable<T>> {
 		}
 		while (!q.isEmpty()) {
 			Node<T> v = q.dequeue();
-			for (Node<T> w : graph.getAdjNode(v)) {
+			for (Node<T> w : graph.getAdjNodes(v)) {
 				if (!marked.contains(w)) {
 					edgeTo.put(w, v);
 					distTo.put(w, distTo.get(v) + 1);

@@ -47,7 +47,7 @@ public class DepthFirstDirectedPaths<T extends Comparable<T>> {
 
 	private void dfs(Digraph<T> graph, Node<T> v) {
 		marked.add(v);
-		for (Node<T> w : graph.getAdjNode(v)) {
+		for (Node<T> w : graph.getAdjNodes(v)) {
 			if (!marked.contains(w)) {
 				edgeTo.put(w, v);
 				dfs(graph, w);

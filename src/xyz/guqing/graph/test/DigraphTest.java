@@ -8,6 +8,7 @@ import org.junit.Test;
 
 import xyz.guqing.graph.BreadthFirstDirectedPaths;
 import xyz.guqing.graph.DepthFirstDirectedPaths;
+import xyz.guqing.graph.DepthFirstOrder;
 import xyz.guqing.graph.Digraph;
 import xyz.guqing.graph.Digraph.Edge;
 import xyz.guqing.graph.Digraph.Node;
@@ -20,7 +21,7 @@ public class DigraphTest {
 		Digraph<Integer> smallGraph = new Digraph<>(getSmallEdgeList());
 		Assert.assertEquals(6, smallGraph.getEdgeCount());
 		Assert.assertEquals(6, smallGraph.getNodeCount());
-		System.out.println(smallGraph.getAdjNode(new Node<>(0)));
+		System.out.println(smallGraph.getAdjNodes(new Node<>(0)));
 		
 		Digraph<Integer> graph = new Digraph<>(getEdgeList());
 		Assert.assertEquals(22, graph.getEdgeCount());
@@ -173,6 +174,88 @@ public class DigraphTest {
 		edgeList.add(edge4);
 		edgeList.add(edge5);
 		edgeList.add(edge6);
+		
+		return edgeList;
+	}
+	
+	@Test
+	public void test() {
+		Digraph<Integer> graph = new Digraph<>(getOtherEdgeList());
+		System.out.println(graph.getAdjNodes(new Node<>(4)));
+		DepthFirstOrder<Integer> dfs = new DepthFirstOrder<>(graph);
+		System.out.println(dfs.pre(new Node<>(12)));
+//		System.out.println("   v  pre post");
+//		System.out.println("--------------");
+//		for (Node<Integer> v : graph.getNodes()) {
+//			System.out.printf(v + ": pre=" + dfs.pre(v) + ", post=" + dfs.post(v) + "\n");
+//		}
+	}
+	
+	private List<Edge<Integer>> getOtherEdgeList() {
+		/**
+		 * edge: 22
+		 * node: 12
+		 * 0: 0->5, 0->1
+		 * 1: 
+		 * 2: 2->0, 2->3
+		 * 3: 3->5, 3->2
+		 * 4: 4->3, 4->2
+		 * 5: 5->4
+		 * 6: 6->0, 6->4, 6->8, 6->9
+		 * 7: 7->6, 7->9
+		 * 8: 8->6
+		 * 9: 9->10, 9->11
+		 * 10: 10->12
+		 * 11: 11->4, 11->12
+		 * 12: 12->9
+		 */
+		
+		List<Edge<Integer>> edgeList = new ArrayList<>();
+		Edge<Integer> edge_05 = new Edge<>(0, 5, 0);
+		Edge<Integer> edge_01 = new Edge<>(0, 1, 0);
+		Edge<Integer> edge_20 = new Edge<>(2, 0, 0);
+		Edge<Integer> edge_23 = new Edge<>(2, 3, 0);
+		Edge<Integer> edge_35 = new Edge<>(3, 5, 0);
+		Edge<Integer> edge_32 = new Edge<>(3, 2, 0);
+		Edge<Integer> edge_43 = new Edge<>(4, 3, 0);
+		Edge<Integer> edge_42 = new Edge<>(4, 2, 0);
+		Edge<Integer> edge_54 = new Edge<>(5, 4, 0);
+		Edge<Integer> edge_60 = new Edge<>(6, 0, 0);
+		Edge<Integer> edge_64 = new Edge<>(6, 4, 0);
+		Edge<Integer> edge_68 = new Edge<>(6, 8, 0);
+		Edge<Integer> edge_69 = new Edge<>(6, 9, 0);
+		Edge<Integer> edge_76 = new Edge<>(7, 6, 0);
+		Edge<Integer> edge_79 = new Edge<>(7, 9, 0);
+		Edge<Integer> edge_86 = new Edge<>(8, 6, 0);
+		Edge<Integer> edge_9_10 = new Edge<>(9, 10, 0);
+		Edge<Integer> edge_9_11 = new Edge<>(9, 11, 0);
+		Edge<Integer> edge_10_12 = new Edge<>(10, 12, 0);
+		Edge<Integer> edge_11_4 = new Edge<>(11, 4, 0);
+		Edge<Integer> edge_11_12 = new Edge<>(11, 12, 0);
+		Edge<Integer> edge_12_9 = new Edge<>(12, 9, 0);
+		
+		edgeList.add(edge_05);
+		edgeList.add(edge_01);
+		edgeList.add(edge_20);
+		edgeList.add(edge_23);
+		edgeList.add(edge_35);
+		edgeList.add(edge_32);
+		edgeList.add(edge_43);
+		edgeList.add(edge_42);
+		edgeList.add(edge_54);
+		edgeList.add(edge_60);
+		edgeList.add(edge_64);
+		edgeList.add(edge_68);
+		edgeList.add(edge_69);
+		edgeList.add(edge_76);
+		edgeList.add(edge_79);
+		edgeList.add(edge_86);
+		edgeList.add(edge_9_10);
+		edgeList.add(edge_9_11);
+		edgeList.add(edge_10_12);
+		edgeList.add(edge_11_4);
+		edgeList.add(edge_11_12);
+		edgeList.add(edge_12_9);
 		
 		return edgeList;
 	}
