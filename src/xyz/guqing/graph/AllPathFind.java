@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 
-import xyz.guqing.graph.Digraph.Node;
+import xyz.guqing.graph.structure.Digraph;
+import xyz.guqing.graph.structure.Node;
 
 /**
  * 给定起点和终点搜索所有路径:
@@ -86,16 +87,15 @@ public class AllPathFind<T extends Comparable<T>> {
 		
 		List<Node<T>> nodes = graph.getAdjNodes(start);
 		
-		//如果该顶点无其它出度,且没有找到终点,回退到上一个节点
-		if (nodes.isEmpty() && !start.equals(end)) {
-			stack.pop();
-			visited.remove(start);
-			return;
-		}
-		
-		// 如果该顶点无其它出度,且该顶点是终点,则找到路径加入容器,直接返回避免for循环判断
-		if(start.equals(end) && nodes.isEmpty()) {
-			//输出从栈底到栈顶的元素，即为一条路径
+		//判断是否有其他出度
+		if(nodes.isEmpty()) {
+			//如果该顶点无其它出度,且没有找到终点,回退到上一个节点
+			if(!start.equals(end)) {
+				stack.pop();
+				visited.remove(start);
+				return;
+			}
+			// 如果该顶点无其它出度,且该顶点是终点,则找到路径加入容器,直接返回避免for循环判断
 			List<Node<T>> path = new ArrayList<>(stack);
 			// 将终点加入到路径中在存储到pathList容器
 			pathList.add(path);
@@ -104,7 +104,8 @@ public class AllPathFind<T extends Comparable<T>> {
 		
 		for (int i=0; i < nodes.size(); i++) {
 			Node<T> v = nodes.get(i);
-			if (start.equals(end)) {//找到终点
+			//找到终点
+			if (start.equals(end)) {
 				//输出从栈底到栈顶的元素，即为一条路径
 				List<Node<T>> path = new ArrayList<>(stack);
 				// 将终点加入到路径中在存储到pathList容器
@@ -114,12 +115,14 @@ public class AllPathFind<T extends Comparable<T>> {
 				visited.remove(start);
 				break;
 			}
-			
-			if (!visited.contains(v)) {//该顶点未被访问过
+
+			//该顶点未被访问过
+			if (!visited.contains(v)) {
 				dfs(v, end);
 			}
-			
-			if (i == nodes.size()-1) {//如果该顶点无其它出度
+
+			//如果该顶点无其它出度
+			if (i == nodes.size()-1) {
 				stack.pop();
 				visited.remove(start);
 			}

@@ -1,13 +1,9 @@
 package xyz.guqing.graph;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Set;
-import java.util.Stack;
+import java.util.*;
 
-import xyz.guqing.graph.Digraph.Node;
+import xyz.guqing.graph.structure.Digraph;
+import xyz.guqing.graph.structure.Node;
 
 /**
  * 有向图的深度优先路径搜索
@@ -17,13 +13,21 @@ import xyz.guqing.graph.Digraph.Node;
  *            泛型<T>表示图存储的数据类型
  */
 public class DepthFirstDirectedPaths<T extends Comparable<T>> {
-	// Save the graph to output the search results
+	/**
+	 * Save the graph to output the search results
+	 */
 	private Digraph<T> graph;
-	// marked.contains(v) = true if v is reachable from s
+	/**
+	 * marked.contains(v) = true if v is reachable from s
+	 */
 	private Set<Node<T>> marked;
-	// edgeTo.get(v) = last edge on path from s to v
+	/**
+	 * edgeTo.get(v) = last edge on path from s to v
+	 */
 	private Map<Node<T>, Node<T>> edgeTo;
-	// source vertex
+	/**
+	 * source vertex
+	 */
 	private final Node<T> s;
 
 	/**

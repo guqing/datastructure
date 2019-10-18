@@ -1,4 +1,4 @@
-package xyz.guqing.graph;
+package xyz.guqing.graph.structure;
 
 import java.util.ArrayList;
 import java.util.Arrays;

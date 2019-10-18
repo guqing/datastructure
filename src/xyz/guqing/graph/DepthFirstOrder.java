@@ -8,8 +8,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import xyz.guqing.graph.Digraph.Edge;
-import xyz.guqing.graph.Digraph.Node;
+import xyz.guqing.graph.structure.Digraph;
+import xyz.guqing.graph.structure.Edge;
+import xyz.guqing.graph.structure.Node;
 import xyz.guqing.queue.Queue;
 
 /**

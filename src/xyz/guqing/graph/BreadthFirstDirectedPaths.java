@@ -7,7 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
-import xyz.guqing.graph.Digraph.Node;
+import xyz.guqing.graph.structure.Digraph;
+import xyz.guqing.graph.structure.Node;
 import xyz.guqing.queue.Queue;
 
 /**

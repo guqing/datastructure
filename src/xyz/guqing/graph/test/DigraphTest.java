@@ -9,9 +9,9 @@ import org.junit.Test;
 import xyz.guqing.graph.BreadthFirstDirectedPaths;
 import xyz.guqing.graph.DepthFirstDirectedPaths;
 import xyz.guqing.graph.DepthFirstOrder;
-import xyz.guqing.graph.Digraph;
-import xyz.guqing.graph.Digraph.Edge;
-import xyz.guqing.graph.Digraph.Node;
+import xyz.guqing.graph.structure.Digraph;
+import xyz.guqing.graph.structure.Edge;
+import xyz.guqing.graph.structure.Node;
 
 public class DigraphTest {
 	

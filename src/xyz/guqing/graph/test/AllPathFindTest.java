@@ -3,14 +3,13 @@ package xyz.guqing.graph.test;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
 import org.junit.Before;
 import org.junit.Test;
 
 import xyz.guqing.graph.AllPathFind;
-import xyz.guqing.graph.Digraph;
-import xyz.guqing.graph.Digraph.Edge;
-import xyz.guqing.graph.Digraph.Node;
+import xyz.guqing.graph.structure.Digraph;
+import xyz.guqing.graph.structure.Edge;
+import xyz.guqing.graph.structure.Node;
 
 /**
  * 搜索所有路径测试
