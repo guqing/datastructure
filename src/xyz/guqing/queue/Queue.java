@@ -135,7 +135,6 @@ public class Queue<E> implements Iterable<E> {
             return item;
         }
     }
-
     /**
      * Unit tests the {@code Queue} data type.
      *
