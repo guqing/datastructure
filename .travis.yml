@@ -1,7 +1,7 @@
 language: java
 jdk:
   - openjdk11
-script: ant build
+script: mvn install
 branches:
   only:
     - master
