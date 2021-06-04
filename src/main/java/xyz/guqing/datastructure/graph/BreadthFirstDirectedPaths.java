@@ -19,21 +19,20 @@ import xyz.guqing.datastructure.graph.structure.Node;
 public class BreadthFirstDirectedPaths<T extends Comparable<T>> {
 	private static final int INFINITY = Integer.MAX_VALUE;
 	// marked.contains(v) = is there an s->v path?
-	private Set<Node<T>> marked;
+	private final Set<Node<T>> marked;
 	// edgeTo.get(v) = last edge on shortest s->v path
-	private Map<Node<T>, Node<T>> edgeTo;
+	private final Map<Node<T>, Node<T>> edgeTo;
 	// distTo.get(v) = length of shortest s->v path
-	private Map<Node<T>, Integer> distTo;
+	private final Map<Node<T>, Integer> distTo;
 	// breadth traversal graph,only used for the toString() method
-	private Digraph<T> graph;
+	private final Digraph<T> graph;
 	//breadth traversal source vertex,only used for the toString() method
 	private Node<T> s;
 
 	/**
-	 * Computes the shortest path from {@code s} and every other vertex in graph
-	 * {@code G}.
+	 * Computes the shortest path from {@code s} and every other vertex in graph.
 	 * 
-	 * @param G
+	 * @param graph
 	 *            the digraph
 	 * @param s
 	 *            the source vertex
@@ -54,9 +53,9 @@ public class BreadthFirstDirectedPaths<T extends Comparable<T>> {
 
 	/**
 	 * Computes the shortest path from any one of the source vertices in
-	 * {@code sources} to every other vertex in graph {@code G}.
+	 * {@code sources} to every other vertex in graph.
 	 * 
-	 * @param G
+	 * @param graph
 	 *            the digraph
 	 * @param sources
 	 *            the source vertices
@@ -166,7 +165,6 @@ public class BreadthFirstDirectedPaths<T extends Comparable<T>> {
 		return path;
 	}
 
-	// 输出起点s到各个顶点之间的路径
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();

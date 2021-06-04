@@ -16,15 +16,15 @@ public class DepthFirstDirectedPaths<T extends Comparable<T>> {
 	/**
 	 * Save the graph to output the search results
 	 */
-	private Digraph<T> graph;
+	private final Digraph<T> graph;
 	/**
 	 * marked.contains(v) = true if v is reachable from s
 	 */
-	private Set<Node<T>> marked;
+	private final Set<Node<T>> marked;
 	/**
 	 * edgeTo.get(v) = last edge on path from s to v
 	 */
-	private Map<Node<T>, Node<T>> edgeTo;
+	private final Map<Node<T>, Node<T>> edgeTo;
 	/**
 	 * source vertex
 	 */

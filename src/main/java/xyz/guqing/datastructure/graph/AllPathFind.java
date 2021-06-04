@@ -69,12 +69,14 @@ public class AllPathFind<T extends Comparable<T>> {
         return this.pathList;
     }
 
-    // A recursive function to print
-    // all paths from 'u' to 'd'.
-    // isVisited[] keeps track of
-    // vertices in current path.
-    // localPathList<> stores actual
-    // vertices in the current path
+    /**
+     * all paths from 'u' to 'd'.
+     *
+     * @param u start vertex
+     * @param d end vertex
+     * @param isVisited keeps track of vertices in current path.
+     * @param localPathList stores actual vertices in the current path
+     */
     private void dfs(Node<T> u, Node<T> d,
         Set<Node<T>> isVisited,
         List<Node<T>> localPathList) {

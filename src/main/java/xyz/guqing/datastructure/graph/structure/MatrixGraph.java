@@ -10,13 +10,13 @@ import java.util.List;
  * @author guqing
  */
 public class MatrixGraph {
-	private List<String> nodes;
-	private int[][] edges;
+	private final List<String> nodes;
+	private final int[][] edges;
 	// 边的数目
 	private int edgeCount;
 	
 	// 遍历时使用的标记
-	private int initialCapacity;
+	private final int initialCapacity;
 	private boolean[] marked;
 	
 	

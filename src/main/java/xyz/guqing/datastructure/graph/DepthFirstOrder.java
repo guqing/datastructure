@@ -15,20 +15,21 @@ import xyz.guqing.datastructure.graph.structure.Node;
 
 /**
  * 深度优先遍历的顺序
+ *
  * @author guqing
  * @param <T> 泛型<T>表示图存储数据的类型
  */
 public class DepthFirstOrder<T extends Comparable<T>> {
 	// marked[v] = has v been marked in dfs?
-	private Set<Node<T>> marked;
+	private final Set<Node<T>> marked;
 	// pre[v] = preorder number of v
-	private Map<Node<T>, Integer> pre;
+	private final Map<Node<T>, Integer> pre;
 	// post[v] = postorder number of v
-	private Map<Node<T>, Integer> post;
+	private final Map<Node<T>, Integer> post;
 	// vertices in preorder
-	private Queue<Node<T>> preorder;
+	private final Queue<Node<T>> preorder;
 	// vertices in postorder
-	private Queue<Node<T>> postorder;
+	private final Queue<Node<T>> postorder;
 	// counter or preorder numbering
 	private int preCounter;
 	// counter for postorder numbering
@@ -166,7 +167,7 @@ public class DepthFirstOrder<T extends Comparable<T>> {
 		System.out.println("   v  pre post");
 		System.out.println("--------------");
 		for (Node<Integer> v : graph.getNodes()) {
-			System.out.printf(v + ": pre=" + dfs.pre(v) + ", post=" + dfs.post(v) + "\n");
+			System.out.print(v + ": pre=" + dfs.pre(v) + ", post=" + dfs.post(v) + "\n");
 		}
 
 		System.out.print("Preorder:  ");
@@ -187,7 +188,7 @@ public class DepthFirstOrder<T extends Comparable<T>> {
 		}
 		
 		
-		/**
+		/*
 		 *	   v  pre post
 		 *  --------------
 		 *     0    0    8

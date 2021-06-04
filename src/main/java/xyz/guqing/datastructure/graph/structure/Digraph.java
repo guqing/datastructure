@@ -28,9 +28,7 @@ public class Digraph<T extends Comparable<T>> {
 	/**
 	 * 邻接表,adj.get(v)从顶点v指出的所有节点
 	 */
-	private Map<Node<T>, List<Node<T>>> adj = new HashMap<>();
-	
-
+	private final Map<Node<T>, List<Node<T>>> adj = new HashMap<>();
 
 	public Digraph() {}
 
